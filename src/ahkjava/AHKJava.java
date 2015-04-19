@@ -24,9 +24,9 @@ public class AHKJava {
              new Driver();
             // buat koneksi
              conn = DriverManager.getConnection(
-                       "jdbc:mysql://localhost/ahk",
+                       "jdbc:mysql://10.0.0.100/ahk",
                        "root",
-                       "");
+                       "panda");
          }
          return conn;
      } 
