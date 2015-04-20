@@ -24,9 +24,9 @@ public class AHKJava {
              new Driver();
             // buat koneksi
              conn = DriverManager.getConnection(
-                       "jdbc:mysql://10.0.0.100/ahk",
-                       "root",
-                       "panda");
+                       "jdbc:mysql://ec2-54-201-3-103.us-west-2.compute.amazonaws.com:3306/ahk",
+                       "mike",
+                       "pine88appl3");
          }
          return conn;
      } 
@@ -37,7 +37,7 @@ public class AHKJava {
          {
             conn = makeConnection();
             Statement s = conn.createStatement();
-            s.executeQuery("Select userID from users"); // select the data from the table
+            s.executeQuery("Select userID,email from users"); // select the data from the table
             ResultSet rs = s.getResultSet(); // get any ResultSet that came from our query
             if (rs != null) // if rs == null, then there is no ResultSet to view  
             {
