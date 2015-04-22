@@ -25,10 +25,12 @@ public class DBCommunicator {
         FUNCTIONS RELATED TO GAME-POOL
         getPoolList();String[] (array with all usernames and their userscores)
         addUserToPool(username);boolean
-        connectToUserInPool(username, opponentUsername);boolean
+        joinUserInPool(username, opponentUsername);boolean 
+        -userStillAvailableInPool(opponentUsername);Boolean
+        -connectToUserInPool(username, opponentUsername);boolean 
     
         FUNCTIONS RELATED TO GAME-TIME
-    
+        
     
     */
 }
