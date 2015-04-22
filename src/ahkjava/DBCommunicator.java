@@ -56,7 +56,7 @@ public class DBCommunicator {
             s.executeQuery("Select userID from users where userID like '"+username+"';"); // select the data from the table
 
             ResultSet rs = s.getResultSet(); // get any ResultSet that came from our query
-            if (rs != null) // if rs == null, then there is no ResultSet to view  
+            if (rs.next() ) // if rs == null, then there is no ResultSet to view  
             {
                 flag = true;
             }
