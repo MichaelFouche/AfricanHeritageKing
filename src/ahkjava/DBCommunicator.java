@@ -13,11 +13,11 @@ public class DBCommunicator {
     
     /*  FUNCTIONS RELATED TO LOGIN
         LoginUser(username, password);String errors[]
-        -usernameExists(username);boolean
+        -usernameExists(username);boolean   (this is also used in register)
         -usernameMatchPassword(username, password);boolean
     
         FUNCTIONS RELATED TO REGISTER USER
-        RegisterUser();String errors[]
+        RegisterUser();String errors[]      (this is also used in login)
         -usernameExists(username);boolean
         -emailExists(email);boolean
         -passwordMatch(password1, password2);boolean
@@ -27,6 +27,7 @@ public class DBCommunicator {
         FUNCTIONS RELATED TO GAME-POOL
         getPoolList();String[] (array with all usernames and their userscores)
         addUserToPool(username);boolean
+        -checkIfUserInPool(username);boolean        
         joinUserInPool(username, opponentUsername);boolean 
         -userStillAvailableInPool(opponentUsername);Boolean
         -connectToUserInPool(username, opponentUsername);boolean 
@@ -37,7 +38,7 @@ public class DBCommunicator {
         FUNCTIONS RELATED TO GAME-TIME          
         requestQuestionForImage(imageID);String[] questions
         submitAnswer(imageID, answer);boolean correct
-        getResults(matchSessionID, userID, opponentUserID);currentMatchScore for userID, currentMatchScore for opponentUserID
+        getResults(matchSessionID, userID, opponentUserID);currentMatchScore for userID. will have to run twice, for each user.
         getScoreForUser(matchID, userName);int score
         getCurrentQuestionForUser(matchID, userName);int currentQuestion
     
