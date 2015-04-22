@@ -5,11 +5,73 @@
  */
 package ahkjava;
 
+import com.mysql.jdbc.Driver;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
 /**
  *
  * @author mifouche
  */
 public class DBCommunicator {
+    private Connection conn = null;  
+    
+    public DBCommunicator()
+    {
+        
+    }
+    
+    public  Connection makeConnection() throws SQLException 
+    {
+        if (conn == null) 
+        {
+             new Driver();
+            // buat koneksi
+             conn = DriverManager.getConnection(
+            /*THE AMAZON SERVER
+                       "jdbc:mysql://ec2-54-201-3-103.us-west-2.compute.amazonaws.com:3306/ahk",
+                       "mike",
+                       "pine88appl3");*/
+
+            //Localhost                    
+                       "jdbc:mysql://localhost/ahk",
+                       "root",
+                       "");
+         }
+         return conn;
+     } 
+        
+     public Boolean usernameExists(String username)
+     {
+         boolean flag = false;
+         try
+         {
+            conn = makeConnection();
+            
+            Statement s = conn.createStatement();
+
+            s.executeQuery("Select userID from users where userID like '"+username+"';"); // select the data from the table
+
+            ResultSet rs = s.getResultSet(); // get any ResultSet that came from our query
+            if (rs != null) // if rs == null, then there is no ResultSet to view  
+            {
+                flag = true;
+            }
+            s.close(); // close the Statement to let the database know we're done with it
+            conn.close();
+            conn = null;
+         }
+         catch(Exception e)
+         {
+             System.out.println(e);
+             
+         }
+         return flag;
+     }
+    
     
     /*  FUNCTIONS RELATED TO LOGIN
         LoginUser(username, password);String errors[]

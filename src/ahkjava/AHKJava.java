@@ -347,6 +347,10 @@ public class AHKJava implements ActionListener{
              System.err.println("Connection Failure");
          }  
        
+        DBCommunicator dbc = new DBCommunicator();
+        System.out.println("User exists: "+dbc.usernameExists("foosh"));
+        System.out.println("User exists: "+dbc.usernameExists("ryno"));
+                
     }
 
     
