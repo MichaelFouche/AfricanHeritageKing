@@ -71,6 +71,33 @@ public class DBCommunicator {
          }
          return flag;
      }
+     public boolean usernameMatchPassword(String username, String password)
+     {
+         boolean flag = false;
+         try
+         {
+            conn = makeConnection();
+            
+            Statement s = conn.createStatement();
+
+            s.executeQuery("Select userID from users where userID like '"+username+"' and password like '"+password+"';"); // select the data from the table
+
+            ResultSet rs = s.getResultSet(); // get any ResultSet that came from our query
+            if (rs.next() ) // if rs == null, then there is no ResultSet to view  
+            {
+                flag = true;
+            }
+            s.close(); // close the Statement to let the database know we're done with it
+            conn.close();
+            conn = null;
+         }
+         catch(Exception e)
+         {
+             System.out.println(e);
+             
+         }
+         return flag;
+     }
     
     
     /*  FUNCTIONS RELATED TO LOGIN
