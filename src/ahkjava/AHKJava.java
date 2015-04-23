@@ -16,6 +16,11 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import javax.sql.DataSource;
 import java.sql.*;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import javax.imageio.ImageIO;
 import javax.swing.ButtonGroup;
 import javax.swing.DefaultBoundedRangeModel;
@@ -37,8 +42,9 @@ import javax.swing.border.TitledBorder;
  *
  * @author mifouche
  */
+
 public class AHKJava implements ActionListener{
-    
+    DBCommunicator dbc = new DBCommunicator();
     private JButton btnSignIn,btnRegister;
     JLabel lblLogin, lblPW;
     JTextField txtLogin, txtPW;
@@ -48,11 +54,33 @@ public class AHKJava implements ActionListener{
     
     JPanel panelPool,panelPoolN,panelPoolS;
     
+    String loggedInUsername;
+    ScheduledExecutorService ses = Executors.newScheduledThreadPool(10);
+    
     public AHKJava() throws SQLException
     {
         makeConnection();
+        loggedInUsername = "";
+        
+        
+        ses.scheduleAtFixedRate(new Runnable() 
+        {
+            @Override
+            public void run() 
+            {
+                System.out.println("execute the timer query");
+                //Update Pool
+                //check if user in pool, then whether the user was matched yet to another user.
+                
+                
+            }
+        }, 5, 2, TimeUnit.SECONDS);  // execute every x seconds
+
     } 
     
+    
+
+
     private Connection conn;  
 
      public  Connection makeConnection() throws SQLException {
@@ -132,6 +160,8 @@ public class AHKJava implements ActionListener{
          btnSignIn.addActionListener(this);
          btnRegister = new JButton("Register");
          btnRegister.addActionListener(this);
+         txtLogin.setText(null);
+         txtPW.setText(null);
          
          //panelLogin.add(lblTitle);
          panelLogin.add(lblLogin);
@@ -285,12 +315,33 @@ public class AHKJava implements ActionListener{
         //Execute when button is pressed
         if(e.getSource()==btnSignIn)
         {
-            System.out.println("You clicked the button btnSignIn");
+            if(txtLogin.getText()==null||txtLogin.getText().equals("")||txtLogin.getText().equals(" "))
+            {
+                JOptionPane.showMessageDialog(null, "Please enter a username to login","AHK - Login Request",JOptionPane.ERROR_MESSAGE);
+            }
+            else if(txtPW.getText()==null||txtPW.getText().equals("")||txtPW.getText().equals(" "))
+            {
+                JOptionPane.showMessageDialog(null, "Please enter a password to login","AHK - Login Request",JOptionPane.ERROR_MESSAGE);
+            }
+            else
+            {
+                String uname = txtLogin.getText();
+                String pw = txtPW.getText();
+                if(dbc.usernameExists(uname))
+                {
+                    if(dbc.usernameMatchPassword(uname, pw))
+                    {
+                        loggedInUsername = uname;
+                    }
+                }
+            }
+            
         }
         if(e.getSource()==btnRegister)
         {
             System.out.println("You clicked the button btnRegister");
         }
+        //for(int a =0;a<)
     }
  
     public void AmortizationLayout() 
@@ -350,6 +401,9 @@ public class AHKJava implements ActionListener{
         DBCommunicator dbc = new DBCommunicator();
         System.out.println("User exists: "+dbc.usernameExists("foosh"));
         System.out.println("User exists: "+dbc.usernameExists("ryno"));
+        
+
+
                 
     }
 

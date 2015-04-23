@@ -120,6 +120,9 @@ public class DBCommunicator {
         joinUserInPool(username, opponentUsername);boolean 
         -userStillAvailableInPool(opponentUsername);Boolean
         -connectToUserInPool(username, opponentUsername);boolean 
+        checkIfPartneredYet
+        -checkIfUserInPool(username);boolean
+        
         
         createMatch(matchID,userID, opponentUserID,currentQuestion, currentMatchScore);String sessionID //there will be 2 entries in the table, 1 for each user of the match
         -getNextMatchID();matchID
