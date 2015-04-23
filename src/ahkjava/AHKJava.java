@@ -74,9 +74,12 @@ public class AHKJava implements ActionListener{
     //pool
     JLabel lblUser[], lblScore[];
     JButton btnJoin[];
+    JButton btnAddUserToPool;
     JScrollPane scrollPane;
     JPanel contentPane;
     int poolSize;
+    
+    JButton btnSubmitAnswer;
     //variables
     
     String loggedInUsername;
@@ -235,6 +238,7 @@ public class AHKJava implements ActionListener{
              btnJoin[i] = new JButton("Join");
              btnJoin[i].addActionListener(this);
          }
+         
          //get the amount of users in pool, then print those, and print empty labels for the rest (10rows) to display nicely.
          JPanel panel = new JPanel(new GridLayout(lblUser.length,3) );
          for (int i = 0; i < lblUser.length; i++) 
@@ -251,7 +255,13 @@ public class AHKJava implements ActionListener{
          contentPane.add(scrollPane);
          panelPoolN.add(contentPane);
          
+         btnAddUserToPool = new JButton("Join Pool");
+         btnAddUserToPool.addActionListener(this);
+         
+         panelPoolS.add(btnAddUserToPool);
+         
          panelPool.add(panelPoolN,BorderLayout.NORTH);
+         panelPool.add(panelPoolS, BorderLayout.SOUTH);
          //END OF PANEL POOL
          
          //GAME PANEL
@@ -299,10 +309,13 @@ public class AHKJava implements ActionListener{
          panelGameE.add(rbc4);
          
          
+         btnSubmitAnswer = new JButton("Submit Answer");
+         btnSubmitAnswer.addActionListener(this);
          lblQuest1 = new JLabel("Question ");
          lblQuest2 = new JLabel("1");
          lblCorrect1 = new JLabel("Correct");
          lblCorrect2 = new JLabel("0");
+         panelGameS.add(btnSubmitAnswer);
          panelGameS.add(lblQuest1);
          panelGameS.add(lblQuest2);
          panelGameS.add(new JLabel("~ ~"));
@@ -366,9 +379,11 @@ public class AHKJava implements ActionListener{
          panelPoolS.setEnabled(flag);
          scrollPane.setEnabled(flag);
          contentPane.setEnabled(flag);
+         btnAddUserToPool.setEnabled(flag);
      }
      public void gameTimeEnable(boolean flag)
      {
+         btnSubmitAnswer.setEnabled(flag);
          pbGame.setEnabled(flag);
          lblGamePic.setEnabled(flag);
          rbc1.setEnabled(flag);
@@ -543,6 +558,14 @@ public class AHKJava implements ActionListener{
                 progressSize = 60;
                 gameTimeLeft = true;
             }
+        }
+        if(e.getSource()==btnAddUserToPool)
+        {
+            System.out.println("Add user to pool");
+        }
+        if(e.getSource()==btnSubmitAnswer)
+        {
+            System.out.println("Check question and get next");
         }
     }
  
