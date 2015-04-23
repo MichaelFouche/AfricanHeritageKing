@@ -32,6 +32,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPasswordField;
 import javax.swing.JProgressBar;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
@@ -47,12 +48,23 @@ public class AHKJava implements ActionListener{
     DBCommunicator dbc = new DBCommunicator();
     private JButton btnSignIn,btnRegister;
     JLabel lblLogin, lblPW;
-    JTextField txtLogin, txtPW;
+    JTextField txtLogin;
+    JPasswordField txtPW;
     
     JFrame jf;
     JPanel panelMain, panelHeading, panelLogo, panelLogin;
     
     JPanel panelPool,panelPoolN,panelPoolS;
+    
+    //Register
+    JFrame jfR;
+    JPanel panelRN, panelRC, panelRS;
+    JLabel lblRLogo, lblRUser, lblRPass1, lblPass2, lblEmail;
+    JTextField  txtRUser,  txtEmail;
+    JPasswordField txtRPass1, txtPass2;
+    JButton btnRRegister;
+    
+    //variables
     
     String loggedInUsername;
     ScheduledExecutorService ses = Executors.newScheduledThreadPool(10);
@@ -155,7 +167,7 @@ public class AHKJava implements ActionListener{
          lblLogin = new JLabel("Username");
          lblPW = new JLabel("Password");
          txtLogin = new JTextField(10);
-         txtPW = new JTextField(10);
+         txtPW = new JPasswordField(10);
          btnSignIn = new JButton("Sign in");
          btnSignIn.addActionListener(this);
          btnRegister = new JButton("Register");
@@ -310,41 +322,151 @@ public class AHKJava implements ActionListener{
          */
          jf.setVisible(true);
      }
+     
+     public void registerGUI()
+     {
+        jfR = new JFrame("Registration - African Heritage King");
+        
+        panelRN = new JPanel();
+        panelRC = new JPanel(new GridLayout(4,2));
+        panelRS = new JPanel();
+              
+        lblRLogo = new JLabel("Logo");
+        lblRUser = new JLabel("Username");
+        lblRPass1 = new JLabel("Password");
+        lblPass2 = new JLabel("Confirm Password");
+        lblEmail = new JLabel("Email");
+    
+        
+        txtRUser = new JTextField(10);
+        txtRPass1 = new JPasswordField(10);
+        txtPass2 = new JPasswordField(10);
+        txtEmail = new JTextField(10);
+        btnRRegister = new JButton ("Register user");
+        btnRRegister.addActionListener(this);
+        
+        try
+         {              
+            BufferedImage bi = ImageIO.read(getClass().getResource("ahkMiniLogo.JPG"));
+            ImageIcon image = new ImageIcon(bi); 
+            lblRLogo = new JLabel(image);
+            panelRN.add(lblRLogo );
+         }
+         catch(Exception e)
+         {
+             System.out.println("createAHKGui(load image): \n"+e);
+         }
+        
+        
+        panelRC.add(lblRUser);
+        panelRC.add(txtRUser);
+        panelRC.add(lblRPass1);
+        panelRC.add(txtRPass1);
+        panelRC.add(lblPass2);
+        panelRC.add(txtPass2);
+        panelRC.add(lblEmail);
+        panelRC.add(txtEmail);
+        
+        panelRS.add(btnRRegister);
+        
+        jfR.add(panelRN, BorderLayout.NORTH);
+        jfR.add(panelRC, BorderLayout.CENTER);
+        jfR.add(panelRS, BorderLayout.SOUTH);
+        jfR.pack();
+        jfR.setVisible(true);
+        jfR.setLocationRelativeTo(null);
+        jfR.setDefaultCloseOperation(jfR.DISPOSE_ON_CLOSE);
+        jfR.setResizable(false);
+     }
      public void actionPerformed(ActionEvent e)
     {
         //Execute when button is pressed
         if(e.getSource()==btnSignIn)
         {
-            if(txtLogin.getText()==null||txtLogin.getText().equals("")||txtLogin.getText().equals(" "))
+            if(btnSignIn.getText().equals("Sign in"))
             {
-                JOptionPane.showMessageDialog(null, "Please enter a username to login","AHK - Login Request",JOptionPane.ERROR_MESSAGE);
-            }
-            else if(txtPW.getText()==null||txtPW.getText().equals("")||txtPW.getText().equals(" "))
-            {
-                JOptionPane.showMessageDialog(null, "Please enter a password to login","AHK - Login Request",JOptionPane.ERROR_MESSAGE);
+                if(txtLogin.getText()==null||txtLogin.getText().equals("")||txtLogin.getText().equals(" "))
+                {
+                    JOptionPane.showMessageDialog(null, "Please enter a username to login","AHK - Login Request",JOptionPane.ERROR_MESSAGE);
+                }
+                else if(txtPW.getText()==null||txtPW.getText().equals("")||txtPW.getText().equals(" "))
+                {
+                    JOptionPane.showMessageDialog(null, "Please enter a password to login","AHK - Login Request",JOptionPane.ERROR_MESSAGE);
+                }
+                else
+                {
+                    String uname = txtLogin.getText();
+                    String pw = txtPW.getText();
+                    if(dbc.usernameExists(uname))
+                    {
+                        if(dbc.usernameMatchPassword(uname, pw))
+                        {
+                            loggedInUsername = uname;
+                            txtLogin.setEnabled(false);
+                            txtPW.setEnabled(false);
+                            txtPW.setText(null);
+                            btnSignIn.setText("Sign Out");
+                        }
+                    }
+                    else
+                    {
+                        JOptionPane.showMessageDialog(null, "Please enter a valid username","AHK - Login Request",JOptionPane.ERROR_MESSAGE);
+                    }
+                        
+                }            
             }
             else
             {
-                String uname = txtLogin.getText();
-                String pw = txtPW.getText();
-                if(dbc.usernameExists(uname))
-                {
-                    if(dbc.usernameMatchPassword(uname, pw))
-                    {
-                        loggedInUsername = uname;
-                    }
-                }
+                loggedInUsername = "";
+                txtLogin.setEnabled(true);
+                txtPW.setEnabled(true);
+                txtPW.setText(null);
+                btnSignIn.setText("Sign in");
             }
+            
             
         }
         if(e.getSource()==btnRegister)
         {
+            this.registerGUI();
             System.out.println("You clicked the button btnRegister");
+        }
+        if(e.getSource() == btnRRegister)
+        {
+            String uname ="";
+            if(txtRUser.getText().equals(""))
+            {
+                JOptionPane.showMessageDialog(null, "Please enter a valid username","AHK - Register Request",JOptionPane.ERROR_MESSAGE);
+            }
+            else if(txtRPass1.getText().equals(""))
+            {
+                JOptionPane.showMessageDialog(null, "Please enter a valid password","AHK - Register Request",JOptionPane.ERROR_MESSAGE);
+            }
+            else if(txtPass2.getText().equals(""))
+            {
+                JOptionPane.showMessageDialog(null, "Please enter a valid confirmation password","AHK - Register Request",JOptionPane.ERROR_MESSAGE);
+            }
+            else if(txtEmail.getText().equals(""))
+            {
+                JOptionPane.showMessageDialog(null, "Please enter a valid email","AHK - Register Request",JOptionPane.ERROR_MESSAGE);
+            }
+            else
+            {
+                /*RegisterUser();String errors[]      (this is also used in login)
+                -usernameExists(username);boolean
+                -emailExists(email);boolean
+                -passwordMatch(password1, password2);boolean
+                -passwordValid(password);boolean
+                -addUser(username, email, password);boolean(for successful adding)
+                */
+                //dbc.usernameExists()
+            }
+            jfR.dispose();
         }
         //for(int a =0;a<)
     }
  
-    public void AmortizationLayout() 
+    /*public void AmortizationLayout() 
     {
         JFrame jf = new JFrame();
         JPanel gui = new JPanel(new BorderLayout(2,2));
@@ -381,7 +503,7 @@ public class AHKJava implements ActionListener{
         //JOptionPane.showMessageDialog(null, gui);
         jf.add(gui);
         jf.setVisible(true);
-    }
+    }*/
     /**
      * @param args the command line arguments
      */
@@ -389,7 +511,7 @@ public class AHKJava implements ActionListener{
         try {
              AHKJava c = new AHKJava();
              c.getRecords();
-             c.AmortizationLayout();
+             //c.AmortizationLayout();
              c.createAHKGui();
              System.out.println("Connection Established");
          }
