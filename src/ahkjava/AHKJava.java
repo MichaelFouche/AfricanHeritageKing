@@ -81,25 +81,36 @@ public class AHKJava implements ActionListener{
     
     String loggedInUsername;
     ScheduledExecutorService ses = Executors.newScheduledThreadPool(10);
+    public int progressSize;
+    boolean gameTimeLeft;
     
     public AHKJava() throws SQLException
     {
         makeConnection();
         loggedInUsername = "";
         poolSize = 0;
-        int progressSize = 60;
+        
         
         ses.scheduleAtFixedRate(new Runnable() 
         {
             @Override
             public void run() 
             {
-                System.out.println("execute the timer query");
+                //System.out.println("execute the timer query");
                 //Update Pool
                 //check if user in pool, then whether the user was matched yet to another user.
                 poolSize = 30;
+                if(gameTimeLeft)
+                {
+                    pbGame.setValue(progressSize);
+                    progressSize = progressSize-1;
+                    pbGame.setString(progressSize + " Seconds Remaining");
+                    if(progressSize<1)
+                    {
+                        gameTimeLeft = false;
+                    }    
+                }
                 
-                pbGame.setValue(progressSize);
                 
             }
         }, 5, 1, TimeUnit.SECONDS);  // execute every x seconds
@@ -529,6 +540,8 @@ public class AHKJava implements ActionListener{
             {
                 gameTimeEnable(true);
                 gamePoolEnable(false);
+                progressSize = 60;
+                gameTimeLeft = true;
             }
         }
     }
