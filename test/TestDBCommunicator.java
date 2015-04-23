@@ -6,7 +6,6 @@
 
 import ahkjava.DBCommunicator;
 import org.testng.Assert;
-import static org.testng.Assert.*;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
@@ -41,6 +40,18 @@ public class TestDBCommunicator {
         Assert.assertFalse(dbc.usernameMatchPassword("foosh","123"));
     }
 
+    @Test (enabled = true)
+    public void registerUser()
+    {
+        Assert.assertTrue(dbc.emailExists("foosh@outlook.com"));
+        Assert.assertFalse(dbc.emailExists("batman@yahoo.com"));
+        Assert.assertTrue(dbc.passwordValid("mayer123"));
+        Assert.assertFalse(dbc.passwordValid("may1"));
+        Assert.assertTrue(dbc.passwordMatch("mayer123", "mayer123"));
+        Assert.assertFalse(dbc.passwordMatch("mayer123", "may1"));
+        Assert.assertTrue(dbc.addUser("ryno", "rmayer@outlook.com", "mayer123"));
+    }
+    
     @BeforeClass
     public static void setUpClass() throws Exception {
     }
