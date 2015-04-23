@@ -44,3 +44,11 @@ CREATE TABLE imageData
 
 
 INSERT INTO users values('foosh','foosh@outlook.com','1@3',0);
+
+INSERT INTO imageData Values('imgID1','','Axum Northern Stelea Park','','','Axum Northern Stelea Park' );
+
+INSERT INTO imageData Values('imgID2','Amphitheatre of El Jem','','','','Amphitheatre of El Jem' );
+
+INSERT INTO imageData values('imgID3','','','','Ruines of Carthage','Ruines of Carthage' );
+
+INSERT INTO imageData values('imgID4','','','','','Volubilis Basilica' );
