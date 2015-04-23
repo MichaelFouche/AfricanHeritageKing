@@ -64,6 +64,19 @@ public class AHKJava implements ActionListener{
     JPasswordField txtRPass1, txtPass2;
     JButton btnRRegister;
     
+    JLabel lblGamePic;
+    JProgressBar pbGame;
+    JPanel panelGame, panelGameW, panelGameE,panelGameS,panelGameN;
+    JRadioButton rbc1, rbc2, rbc3, rbc4;
+    ButtonGroup rbGroup;
+    JLabel lblQuest1, lblQuest2, lblCorrect1, lblCorrect2;
+    
+    //pool
+    JLabel lblUser[], lblScore[];
+    JButton btnJoin[];
+    JScrollPane scrollPane;
+    JPanel contentPane;
+    int poolSize;
     //variables
     
     String loggedInUsername;
@@ -73,7 +86,8 @@ public class AHKJava implements ActionListener{
     {
         makeConnection();
         loggedInUsername = "";
-        
+        poolSize = 0;
+        int progressSize = 60;
         
         ses.scheduleAtFixedRate(new Runnable() 
         {
@@ -83,10 +97,12 @@ public class AHKJava implements ActionListener{
                 System.out.println("execute the timer query");
                 //Update Pool
                 //check if user in pool, then whether the user was matched yet to another user.
+                poolSize = 30;
                 
+                pbGame.setValue(progressSize);
                 
             }
-        }, 5, 2, TimeUnit.SECONDS);  // execute every x seconds
+        }, 5, 1, TimeUnit.SECONDS);  // execute every x seconds
 
     } 
     
@@ -195,8 +211,7 @@ public class AHKJava implements ActionListener{
          
          
          
-         JLabel lblUser[], lblScore[];
-         JButton btnJoin[];
+         
          
          lblUser = new JLabel[30];
          lblScore = new JLabel[30];
@@ -205,7 +220,7 @@ public class AHKJava implements ActionListener{
          for(int i=0;i<lblUser.length;i++)
          {
              lblUser[i] = new JLabel("opponent");
-             lblScore[i] = new JLabel("user");
+             lblScore[i] = new JLabel("score");
              btnJoin[i] = new JButton("Join");
              btnJoin[i].addActionListener(this);
          }
@@ -217,10 +232,10 @@ public class AHKJava implements ActionListener{
             panel.add(lblScore[i]);
             panel.add(btnJoin[i]);
          }
-         JScrollPane scrollPane = new JScrollPane(panel);
+         scrollPane = new JScrollPane(panel);
          scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-         scrollPane.setBounds(10, 10, 400, 200);
-         JPanel contentPane = new JPanel(null);
+         scrollPane.setBounds(10, 10, 400, 300);
+         contentPane = new JPanel(null);
          contentPane.setPreferredSize(new Dimension(450, 300));
          contentPane.add(scrollPane);
          panelPoolN.add(contentPane);
@@ -229,9 +244,7 @@ public class AHKJava implements ActionListener{
          //END OF PANEL POOL
          
          //GAME PANEL
-         JPanel panelGame, panelGameW, panelGameE,panelGameS,panelGameN;
-         JRadioButton rbc1, rbc2, rbc3, rbc4;
-         ButtonGroup rbGroup;
+         
          
          panelGame = new JPanel(new BorderLayout(2,2));
          panelGame.setBorder(new TitledBorder("Game Time"));
@@ -241,17 +254,18 @@ public class AHKJava implements ActionListener{
          panelGameN = new JPanel(new BorderLayout(1,1));
          
          DefaultBoundedRangeModel model = new DefaultBoundedRangeModel(100, 50, 0, 250);
-         JProgressBar pbGame = new JProgressBar(0,100);
+         pbGame = new JProgressBar(0,60);
          pbGame.setStringPainted(true);
-         pbGame.setValue(50);
-         pbGame.setString("30 Seconds remaining");    
+         pbGame.setValue(60);
+         pbGame.setString("60 Seconds remaining");    
          panelGameN.add(pbGame);
+         
          try
          {              
             BufferedImage bi = ImageIO.read(getClass().getResource("tablemountain.jpg"));
             ImageIcon image = new ImageIcon(bi); 
-            JLabel l1 = new JLabel(image);
-            panelGameW.add(l1 );
+            lblGamePic = new JLabel(image);
+            panelGameW.add(lblGamePic );
          }
          catch(Exception e)
          {
@@ -273,7 +287,7 @@ public class AHKJava implements ActionListener{
          panelGameE.add(rbc3);
          panelGameE.add(rbc4);
          
-         JLabel lblQuest1, lblQuest2, lblCorrect1, lblCorrect2;
+         
          lblQuest1 = new JLabel("Question ");
          lblQuest2 = new JLabel("1");
          lblCorrect1 = new JLabel("Correct");
@@ -321,6 +335,45 @@ public class AHKJava implements ActionListener{
         });
          */
          jf.setVisible(true);
+     }
+     public void gamePoolEnable(boolean flag)
+     {
+         for(int a=0;a<lblUser.length;a++)
+         {
+             lblUser[a].setEnabled(flag);
+         }
+         for(int a=0;a<lblScore.length;a++)
+         {
+             lblScore[a].setEnabled(flag);
+         }
+         for(int a=0;a<btnJoin.length;a++)
+         {
+             btnJoin[a].setEnabled(flag);
+         }    
+         panelPool.setEnabled(flag);
+         panelPoolN.setEnabled(flag);
+         panelPoolS.setEnabled(flag);
+         scrollPane.setEnabled(flag);
+         contentPane.setEnabled(flag);
+     }
+     public void gameTimeEnable(boolean flag)
+     {
+         pbGame.setEnabled(flag);
+         lblGamePic.setEnabled(flag);
+         rbc1.setEnabled(flag);
+         rbc2.setEnabled(flag);
+         rbc3.setEnabled(flag);
+         rbc4 .setEnabled(flag);
+         lblQuest1.setEnabled(flag);
+         lblQuest2.setEnabled(flag);
+         lblCorrect1 .setEnabled(flag);
+         lblCorrect2.setEnabled(flag);
+         
+         panelGame.setEnabled(flag);
+        panelGameW.setEnabled(flag);
+        panelGameE.setEnabled(flag);
+        panelGameS.setEnabled(flag);
+        panelGameN.setEnabled(flag);
      }
      
      public void registerGUI()
@@ -378,6 +431,8 @@ public class AHKJava implements ActionListener{
         jfR.setDefaultCloseOperation(jfR.DISPOSE_ON_CLOSE);
         jfR.setResizable(false);
      }
+     
+     
      public void actionPerformed(ActionEvent e)
     {
         //Execute when button is pressed
@@ -406,6 +461,8 @@ public class AHKJava implements ActionListener{
                             txtPW.setEnabled(false);
                             txtPW.setText(null);
                             btnSignIn.setText("Sign Out");
+                            gameTimeEnable(false);
+                            gamePoolEnable(true);
                         }
                     }
                     else
@@ -422,6 +479,8 @@ public class AHKJava implements ActionListener{
                 txtPW.setEnabled(true);
                 txtPW.setText(null);
                 btnSignIn.setText("Sign in");
+                gameTimeEnable(false);
+                gamePoolEnable(false);
             }
             
             
@@ -463,7 +522,15 @@ public class AHKJava implements ActionListener{
             }
             jfR.dispose();
         }
-        //for(int a =0;a<)
+        /*btnJoin*/
+        for(int a =0;a<poolSize;a++)
+        {
+            if(e.getSource()==btnJoin[a])
+            {
+                gameTimeEnable(true);
+                gamePoolEnable(false);
+            }
+        }
     }
  
     /*public void AmortizationLayout() 
@@ -514,6 +581,8 @@ public class AHKJava implements ActionListener{
              //c.AmortizationLayout();
              c.createAHKGui();
              System.out.println("Connection Established");
+             c.gameTimeEnable(false);
+             c.gamePoolEnable(false);
          }
          catch (SQLException e) {
              e.printStackTrace();
@@ -525,7 +594,7 @@ public class AHKJava implements ActionListener{
         System.out.println("User exists: "+dbc.usernameExists("ryno"));
         
 
-
+        
                 
     }
 
