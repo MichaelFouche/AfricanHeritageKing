@@ -16,6 +16,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import javax.sql.DataSource;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Executors;
@@ -84,8 +85,12 @@ public class AHKJava implements ActionListener{
     
     String loggedInUsername;
     ScheduledExecutorService ses = Executors.newScheduledThreadPool(10);
+    ScheduledExecutorService ses5 = Executors.newScheduledThreadPool(10);
     public int progressSize;
     boolean gameTimeLeft;
+    
+    ArrayList<ArrayList<String>> poolList;
+    
     
     public AHKJava() throws SQLException
     {
@@ -102,7 +107,7 @@ public class AHKJava implements ActionListener{
                 //System.out.println("execute the timer query");
                 //Update Pool
                 //check if user in pool, then whether the user was matched yet to another user.
-                poolSize = 30;
+                
                 if(gameTimeLeft)
                 {
                     pbGame.setValue(progressSize);
@@ -117,6 +122,23 @@ public class AHKJava implements ActionListener{
                 
             }
         }, 5, 1, TimeUnit.SECONDS);  // execute every x seconds
+        
+        ses5.scheduleAtFixedRate(new Runnable() 
+        {
+            @Override
+            public void run() 
+            {
+                //System.out.println("execute the timer query");
+                //Update Pool
+                //check if user in pool, then whether the user was matched yet to another user.                
+                poolList = dbc.getPoolList();
+                poolSize = poolList.size();
+                panelPoolN.revalidate();
+                panelPoolN.repaint();
+                System.out.println("refresh");
+                
+            }
+        }, 5, 5, TimeUnit.SECONDS);  // execute every x seconds
 
     } 
     
@@ -223,30 +245,50 @@ public class AHKJava implements ActionListener{
          panelPoolN = new JPanel();
          panelPoolS = new JPanel();
          
+         poolList = dbc.getPoolList();  
+         poolSize = poolList.size();
+         poolList = dbc.getPoolList();    
+         lblUser = new JLabel[poolSize];
+         lblScore = new JLabel[poolSize];
+         btnJoin = new JButton[poolSize];
          
-         
-         
-         
-         lblUser = new JLabel[30];
-         lblScore = new JLabel[30];
-         btnJoin = new JButton[30];
-         
-         for(int i=0;i<lblUser.length;i++)
+           
+         for(int i=0;i<poolSize;i++)
          {
-             lblUser[i] = new JLabel("opponent");
-             lblScore[i] = new JLabel("score");
+             ArrayList<String> currentList = poolList.get(i);
+             lblUser[i] = new JLabel(currentList.get(0));
+             lblScore[i] = new JLabel(currentList.get(1));
              btnJoin[i] = new JButton("Join");
              btnJoin[i].addActionListener(this);
          }
          
          //get the amount of users in pool, then print those, and print empty labels for the rest (10rows) to display nicely.
-         JPanel panel = new JPanel(new GridLayout(lblUser.length,3) );
-         for (int i = 0; i < lblUser.length; i++) 
+         JPanel panel;
+         if(poolSize<11)
          {
+             panel = new JPanel(new GridLayout(10,3) );
+         }
+         else
+         {
+             panel = new JPanel(new GridLayout(poolSize,3) );             
+         }
+         
+         for (int i = 0; i < poolSize; i++) 
+         {             
             panel.add(lblUser[i]);
             panel.add(lblScore[i]);
             panel.add(btnJoin[i]);
          }
+         if(poolSize<11)
+         {
+            for(int i=0;i<10-poolSize;i++)
+            {
+               panel.add(new JLabel(""));
+               panel.add(new JLabel(""));
+               panel.add(new JLabel(""));
+            }    
+         }
+         
          scrollPane = new JScrollPane(panel);
          scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
          scrollPane.setBounds(10, 10, 400, 300);
@@ -362,15 +404,15 @@ public class AHKJava implements ActionListener{
      }
      public void gamePoolEnable(boolean flag)
      {
-         for(int a=0;a<lblUser.length;a++)
+         for(int a=0;a<poolList.size();a++)
          {
              lblUser[a].setEnabled(flag);
          }
-         for(int a=0;a<lblScore.length;a++)
+         for(int a=0;a<poolList.size();a++)
          {
              lblScore[a].setEnabled(flag);
          }
-         for(int a=0;a<btnJoin.length;a++)
+         for(int a=0;a<poolList.size();a++)
          {
              btnJoin[a].setEnabled(flag);
          }    
@@ -482,6 +524,7 @@ public class AHKJava implements ActionListener{
                     {
                         if(dbc.usernameMatchPassword(uname, pw))
                         {
+                            poolList = dbc.getPoolList();  
                             loggedInUsername = uname;
                             txtLogin.setEnabled(false);
                             txtPW.setEnabled(false);
@@ -549,19 +592,37 @@ public class AHKJava implements ActionListener{
             jfR.dispose();
         }
         /*btnJoin*/
-        for(int a =0;a<poolSize;a++)
+        if(poolSize>0)
         {
-            if(e.getSource()==btnJoin[a])
+            
+            for(int a =0;a<poolSize;a++)
             {
-                gameTimeEnable(true);
-                gamePoolEnable(false);
-                progressSize = 60;
-                gameTimeLeft = true;
+                System.out.println("poolSize: "+poolSize);
+                if(e.getSource()==btnJoin[a])
+                {
+                    gameTimeEnable(true);
+                    gamePoolEnable(false);
+                    progressSize = 60;
+                    gameTimeLeft = true;
+                }
             }
         }
         if(e.getSource()==btnAddUserToPool)
         {
-            System.out.println("Add user to pool");
+            if(btnAddUserToPool.getText().equals("Join Pool"))
+            {
+                if(dbc.addUserToPool(loggedInUsername))
+                {
+                    System.out.println("User added to pool");
+                    btnAddUserToPool.setText("Leave Pool");
+                }
+            }
+            else
+            {
+                btnAddUserToPool.setText("Join Pool");
+            }
+            
+            
         }
         if(e.getSource()==btnSubmitAnswer)
         {

@@ -115,6 +115,7 @@ public class DBCommunicator {
         ArrayList<String> errors = new ArrayList<String>();
         boolean userExists = false;
         boolean emailExists = false;
+        boolean emailValid = false;
         boolean pwordMatch = false;
         boolean pwordValid = false;
         boolean userAdded = false;
@@ -126,26 +127,32 @@ public class DBCommunicator {
             {
                 emailExists = emailExists(email);
                 if(!emailExists)
-                {
-                    pwordValid = passwordValid(pword1);
-                    if(pwordValid)
+                {   
+                    emailValid = emailValid(email);
+                    if(emailValid)
                     {
-                        pwordMatch = passwordMatch(pword1,pword2);
-                        if(pwordMatch)
+                        pwordValid = passwordValid(pword1);
+                        if(pwordValid)
                         {
-                            userAdded = addUser(uname, email, pword1);
-                            if(userAdded)
+                            pwordMatch = passwordMatch(pword1,pword2);
+                            if(pwordMatch)
                             {
-                                System.out.println("user added");
+                                userAdded = addUser(uname, email, pword1);
+                                if(userAdded)
+                                {
+                                    System.out.println("user added");
+                                }
+                                else
+                                    errors.add("userNotAdded");
                             }
                             else
-                                errors.add("userNotAdded");
+                            errors.add("passwordMismatch");
                         }
                         else
-                            errors.add("passwordMismatch");
+                          errors.add("passwordInvalid");   
                     }
                     else
-                        errors.add("passwordInvalid");
+                        errors.add("emailInvalid");
                 }
                 else
                     errors.add("emailExists");
@@ -186,6 +193,15 @@ public class DBCommunicator {
         return exists;
     }
     
+    public boolean emailValid(String email)
+    {
+        boolean valid = false;
+        
+        if(email.matches("^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"+ "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$"))
+            valid = true;
+        
+        return valid;
+    }
     public boolean passwordValid(String pword)
     {
         boolean valid = false;
@@ -263,7 +279,7 @@ public class DBCommunicator {
             
             Statement s = conn.createStatement();
             
-            s.execute("Select userID,score from users;"); //check data inserted
+            s.execute("Select gamepool.userID,users.score from gamepool INNER JOIN users ON users.userID =  gamepool.userID;"); //check data inserted
             
             ResultSet rs = s.getResultSet(); // get any ResultSet that came from our query
             ResultSetMetaData meta = rs.getMetaData();
@@ -271,7 +287,7 @@ public class DBCommunicator {
             {
                 int i = 1;
                 int numCols = meta.getColumnCount();
-                while(i <= numCols )
+                if(i <= numCols )
                 {
                     usersPool.add(rs.getString("userID"));
                     usersPool.add(rs.getString("score"));
@@ -302,7 +318,7 @@ public class DBCommunicator {
             Statement insert = conn.createStatement();
             Statement s = conn.createStatement();
             
-            insert.execute("INSERT INTO gamePool (userID, opponentUserID) Values( '"+uname+"', NULL ;"); // insert the data to the table
+            insert.execute("INSERT INTO gamePool (userID, opponentUserID) Values( '"+uname+"', '' ;"); // insert the data to the table
             s.execute("Select userID from gamePool where userID  = '"+uname+"';"); //check data inserted
             
             ResultSet rs = s.getResultSet(); // get any ResultSet that came from our query
@@ -368,7 +384,7 @@ public class DBCommunicator {
         return joinedPool;
     }
     
-    public boolean userAvailable(String oppoName)
+    public boolean userAvailable(String uname)
     {
         boolean available = false;
         
@@ -378,7 +394,7 @@ public class DBCommunicator {
             
             Statement s = conn.createStatement();
             
-            s.execute("SELECT opponentUserID FROM GamePool where opponentUserID = '"+oppoName+"';"); //check user in pool            
+            s.execute("SELECT UserID FROM GamePool where UserID = '"+uname+"' and opponentUserID = null;"); //check user in pool            
             ResultSet rs = s.getResultSet(); // get any ResultSet that came from our query
             while (rs.next() ) // if rs == null, then there is no ResultSet to view  
             {
@@ -424,9 +440,9 @@ public class DBCommunicator {
         return connected;
     }
     
-    public String createMatch(String matchID, String userID, String opponentUserID, int currentQuestion, float currentMatchScore)
+    public int createMatch(String matchID, String userID, String opponentUserID, int currentQuestion, float currentMatchScore)
     {
-        String sessionID = " ";
+        int sessionID = 0;
         
         try
          {
@@ -441,7 +457,7 @@ public class DBCommunicator {
             ResultSet rs = s.getResultSet(); // get any ResultSet that came from our query
             if (rs.next() ) // if rs == null, then there is no ResultSet to view  
             {
-               sessionID = rs.getString("matchSessionID");
+               sessionID = rs.getInt("matchSessionID");
             }
             insert.close();
             s.close(); // close the Statement to let the database know we're done with it
@@ -457,9 +473,9 @@ public class DBCommunicator {
         return sessionID;
     }
     
-    public String getNextMatchID()
+    public int getNextMatchID()
     {
-        String prevMatchID = "";
+        int prevMatchID = 0;
         
         try
          {
@@ -467,12 +483,12 @@ public class DBCommunicator {
             
             Statement s = conn.createStatement();
             
-            //s.execute("Select matchID from matchSession where matchID  = '"++"';"); //check data inserted
+            s.execute("Select matchID from matchSession;"); //check data inserted
             
             ResultSet rs = s.getResultSet(); // get any ResultSet that came from our query
-            if (rs.next() ) // if rs == null, then there is no ResultSet to view  
+            if (rs.last() ) // if rs == null, then there is no ResultSet to view  
             {
-               prevMatchID = rs.getString("matchID");
+               prevMatchID = rs.getInt("matchID");
             }
             s.close(); // close the Statement to let the database know we're done with it
             conn.close();
@@ -484,7 +500,7 @@ public class DBCommunicator {
              
          }
         
-        return prevMatchID;
+        return prevMatchID++;
     }
     
         /*
@@ -508,18 +524,15 @@ public class DBCommunicator {
             
             Statement s = conn.createStatement();
             
-            s.execute("Select question, answer from questions where imageID = '"+imageID+"';"); //check data inserted
+            s.execute("Select question1, question2, question3, question4 from imgData where imageID = '"+imageID+"';"); //check data inserted
             
             ResultSet rs = s.getResultSet(); // get any ResultSet that came from our query
-            ResultSetMetaData meta = rs.getMetaData();
             while (rs.next() ) // if rs == null, then there is no ResultSet to view  
             {
                 int i = 1;
-                int numCols = meta.getColumnCount();
-                while(i <= numCols )
+                while(i <= 4 )
                 {
-                    question.add(rs.getString("question"));
-                    question.add(rs.getString("answer"));
+                    question.add(rs.getString("question"+i+""));
                 } 
             }
             s.close(); // close the Statement to let the database know we're done with it
@@ -565,23 +578,52 @@ public class DBCommunicator {
         return correct;
         
     }
-    public int getResults(String matchSessionID,String userID, String opponentUserID)
+    public int getResults(String matchID,String userID, String opponentUserID)
     {
-        int score = 0;
+        int currentMatchScore = 0;
         
-         try
+        try
         {
             conn = makeConnection();
             
             Statement s = conn.createStatement();
             
-            //s.execute("Select answer from questions where imageID = '"+imageID+"';"); //check data inserted
+            s.execute("Select currentMatchScore from matchSession where matchID = '"+matchID+"' and userID = '"+userID+"' and opponentUserID = '"+opponentUserID+"' ;"); //check data inserted
             
             ResultSet rs = s.getResultSet(); // get any ResultSet that came from our query
             if (rs.next() ) // if rs == null, then there is no ResultSet to view  
             {
-                //    if(answer.matches(rs.getString("answer")))
-                 //       correct = true;
+                currentMatchScore = rs.getInt("currentMatchScore");
+                
+            }
+            s.close(); // close the Statement to let the database know we're done with it
+            conn.close();
+            conn = null;
+        }
+        catch(Exception e)
+        {
+            System.out.println(e);
+        }
+        
+        return currentMatchScore;
+    }
+    
+    public int getScoreForUser(String matchID, String userName)
+    {
+        int score = 0;
+        
+        try
+        {
+            conn = makeConnection();
+            
+            Statement s = conn.createStatement();
+            
+            s.execute("Select currentMatchScore from matchSession where matchID = '"+matchID+"' userID = '"+userName+"';"); //check data inserted
+            
+            ResultSet rs = s.getResultSet(); // get any ResultSet that came from our query
+            if (rs.next() ) // if rs == null, then there is no ResultSet to view  
+            {
+                score = rs.getInt("score");
                 
             }
             s.close(); // close the Statement to let the database know we're done with it
@@ -596,6 +638,157 @@ public class DBCommunicator {
         return score;
     }
     
+    public int getCurrentQuestionForUser(String matchID,String userName)
+    {
+        int currentQuestion = 0;
+        
+        try
+        {
+            conn = makeConnection();
+            
+            Statement s = conn.createStatement();
+            
+            s.execute("Select currentQuestion from matchSession where userID = '"+userName+"' and matchID = '"+matchID+"';"); //check data inserted
+            
+            ResultSet rs = s.getResultSet(); // get any ResultSet that came from our query
+            if (rs.next() ) // if rs == null, then there is no ResultSet to view  
+            {
+                currentQuestion = rs.getInt("currentQuestion");
+                
+            }
+            s.close(); // close the Statement to let the database know we're done with it
+            conn.close();
+            conn = null;
+        }
+        catch(Exception e)
+        {
+            System.out.println(e);
+        }
+        
+        return currentQuestion;
+    }
+    
+    public boolean checkIfUserInPool(String username)
+    {
+        boolean inPool = false;
+        
+        try
+        {
+            conn = makeConnection();
+            
+            Statement s = conn.createStatement();
+            
+            s.execute("Select userID from gamePool where userID = '"+username+"';"); //check data inserted
+            
+            ResultSet rs = s.getResultSet(); // get any ResultSet that came from our query
+            if (rs.next() ) // if rs == null, then there is no ResultSet to view  
+            {
+                inPool = true;
+                
+            }
+            s.close(); // close the Statement to let the database know we're done with it
+            conn.close();
+            conn = null;
+        }
+        catch(Exception e)
+        {
+            System.out.println(e);
+        }
+        
+        return inPool;
+    }
+    
     /*delete from gamepool
-        delete matchSession*/
+        delete matchSession
+    delete from users*/
+    public boolean deleteGame(String uname )
+    {
+        boolean success = false;
+        
+        try
+        {
+            conn = makeConnection();
+            
+            Statement s = conn.createStatement();
+            Statement check = conn.createStatement();
+            
+            s.execute("Delete from gamePool where userID = '"+uname+"';"); //check data inserted
+            check.execute("select userID from gamePool where userID = '"+uname+"';");
+            
+            ResultSet rs = check.getResultSet(); // get any ResultSet that came from our query
+            if (rs.next() ) // if rs == null, then there is no ResultSet to view  
+            {
+                success = false;
+            }
+            s.close(); // close the Statement to let the database know we're done with it
+            conn.close();
+            conn = null;
+        }
+        catch(Exception e)
+        {
+            System.out.println(e);
+        }
+        
+        return success;
+    }
+    public boolean deleteMatch(int matchSessionID)
+    {
+        boolean success = false;
+        
+        try
+        {
+            conn = makeConnection();
+            
+            Statement s = conn.createStatement();
+            Statement check = conn.createStatement();
+            
+            s.execute("Delete from matchSession where matchSessionID = '"+matchSessionID+"';"); //check data inserted
+            check.execute("select matchSessionID from matchSession where matchSessionID = '"+matchSessionID+"';");
+            
+            ResultSet rs = check.getResultSet(); // get any ResultSet that came from our query
+            if (rs.next() ) // if rs == null, then there is no ResultSet to view  
+            {
+                success = false;
+            }
+            s.close(); // close the Statement to let the database know we're done with it
+            conn.close();
+            conn = null;
+        }
+        catch(Exception e)
+        {
+            System.out.println(e);
+        }
+        
+        return success;
+    }
+    public boolean deleteUser(String uname)
+    {
+        boolean success = true;
+        
+        try
+        {
+            conn = makeConnection();
+            
+            Statement s = conn.createStatement();
+            Statement check = conn.createStatement();
+            
+            s.execute("Delete from Users where UserID = '"+uname+"';"); //check data inserted
+            check.execute("select userID from Users where UserID = '"+uname+"';");
+            
+            ResultSet rs = check.getResultSet(); // get any ResultSet that came from our query
+            if (rs.next() ) // if rs == null, then there is no ResultSet to view  
+            {
+                success = false;
+            }
+            s.close(); // close the Statement to let the database know we're done with it
+            conn.close();
+            conn = null;
+        }
+        catch(Exception e)
+        {
+            System.out.println(e);
+        }
+        
+        return success;
+    }
 }
