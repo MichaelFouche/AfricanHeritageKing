@@ -5,6 +5,7 @@
  */
 
 import ahkjava.DBCommunicator;
+import java.util.ArrayList;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
@@ -45,11 +46,53 @@ public class TestDBCommunicator {
     {
         Assert.assertTrue(dbc.emailExists("foosh@outlook.com"));
         Assert.assertFalse(dbc.emailExists("batman@yahoo.com"));
+        Assert.assertTrue(dbc.emailValid("batman@yahoo.com"));
+        Assert.assertFalse(dbc.emailValid("mkyong@.com.my"));
         Assert.assertTrue(dbc.passwordValid("mayer123"));
         Assert.assertFalse(dbc.passwordValid("may1"));
         Assert.assertTrue(dbc.passwordMatch("mayer123", "mayer123"));
         Assert.assertFalse(dbc.passwordMatch("mayer123", "may1"));
-        Assert.assertTrue(dbc.addUser("ryno", "rmayer@outlook.com", "mayer123"));
+        Assert.assertTrue(dbc.addUser("rynom", "rmayer@outlook.com", "mayer123"));
+        Assert.assertTrue(dbc.deleteUser("rynom"));
+    }
+    
+    @Test (enabled = true)
+    public void GamePool()
+    {
+        ArrayList<ArrayList<String>> poolList = dbc.getPoolList();
+        Assert.assertNotNull(poolList);
+        Assert.assertTrue(dbc.addUserToPool("ryno"));
+        Assert.assertTrue(dbc.checkUserInPool("ryno"));
+        Assert.assertFalse(dbc.checkUserInPool("batman"));
+        Assert.assertTrue(dbc.joinUserInPool("foosh", "ryno"));
+        Assert.assertTrue(dbc.connectToUser("foosh", "ryno"));
+        Assert.assertTrue(dbc.connectToUser("foosh", "batman"));
+        Assert.assertFalse(dbc.userAvailable("foosh"));
+        Assert.assertEquals(dbc.getNextMatchID(),2);
+        
+        Assert.assertTrue(dbc.addUser("rynom", "rmayer@outlook.com", "mayer123"));
+        Assert.assertTrue(dbc.addUserToPool("rynom"));
+        Assert.assertTrue(dbc.userAvailable("rynom"));
+        //delete match
+        Assert.assertTrue(dbc.deleteGame("rynom"));
+    }
+    
+    @Test (enabled = true)
+    public void InGame()
+    {
+        ArrayList<String> Q = dbc.requestQuestionForImage("imgID1");
+        Assert.assertEquals(Q.size(),4 );
+        Assert.assertTrue(dbc.submitAnswer("imgID1", ""));
+        Assert.assertFalse(dbc.submitAnswer("imgID1", "Axum Northern Stelea Park"));
+        Assert.assertEquals(dbc.getResults("1", "foosh", "ryno"),1);
+        Assert.assertEquals(dbc.getScoreForUser("1","foosh"), 1);
+        Assert.assertEquals(dbc.getCurrentQuestionForUser("1","foosh"),1);
+        Assert.assertTrue(dbc.checkUserInPool("rynom"));
+        
+       Assert.assertEquals(dbc.createMatch("1", "foosh", "ryno", 1, 0), 1);
+
+        
+        Assert.assertTrue(dbc.deleteMatch(1));
     }
     
     @BeforeClass

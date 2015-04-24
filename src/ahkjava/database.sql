@@ -21,16 +21,16 @@ CREATE TABLE GamePool
 
 CREATE TABLE MatchSession
 (
-	matchSessionID			INT(10) NOT NULL AUTO_INCREMENT,
-        matchID                         VARCHAR(10),
+	matchSessionID			INT PRIMARY KEY AUTO_INCREMENT,
+        matchID                         INT,
 	userID				VARCHAR(10),
 	opponentUserID                  VARCHAR(10),
 	currentQuestion                 SMALLINT,        
 	currentMatchScore               FLOAT,        
 	CONSTRAINT fk_MatchSession_userID FOREIGN KEY (userID) REFERENCES Users(userID),
-	CONSTRAINT fk_MatchSession_opponentUserID FOREIGN KEY (opponentUserID) REFERENCES Users(userID),
-        PRIMARY KEY (matchSessionID)
+	CONSTRAINT fk_MatchSession_opponentUserID FOREIGN KEY (opponentUserID) REFERENCES Users(userID)
 );
+
 
 CREATE TABLE imageData
 (
