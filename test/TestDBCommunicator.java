@@ -56,7 +56,7 @@ public class TestDBCommunicator {
         Assert.assertTrue(dbc.deleteUser("rynom"));
     }
     
-    @Test (enabled = true)
+    @Test (enabled = false)
     public void GamePool()
     {
         ArrayList<ArrayList<String>> poolList = dbc.getPoolList();
@@ -77,7 +77,7 @@ public class TestDBCommunicator {
         Assert.assertTrue(dbc.deleteGame("rynom"));
     }
     
-    @Test (enabled = true)
+    @Test (enabled = false)
     public void InGame()
     {
         ArrayList<String> Q = dbc.requestQuestionForImage("imgID1");
