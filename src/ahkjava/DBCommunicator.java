@@ -17,7 +17,7 @@ import java.util.ArrayList;
 
 /**
  *
- * @author mifouche
+ * @author mifouche and RynoMayer
  */
 public class DBCommunicator {
     private Connection conn = null;  
@@ -530,12 +530,12 @@ public class DBCommunicator {
             
             Statement s = conn.createStatement();
             
-            s.execute("Select MAX(matchID) from matchsession;"); //check data inserted
+            s.execute("Select MAX(matchID) as matchID from matchsession;"); //check data inserted
             
             ResultSet rs = s.getResultSet(); // get any ResultSet that came from our query
             if (rs.next() ) // if rs == null, then there is no ResultSet to view  
             {
-                System.out.println("MatchID: "+rs.getInt("matchID"));
+               System.out.println("MatchID: "+rs.getInt("matchID"));
                prevMatchID = rs.getInt("matchID");
                System.out.println("prev matchID " + prevMatchID);
             }
@@ -575,7 +575,7 @@ public class DBCommunicator {
             ResultSet rs = s.getResultSet(); // get any ResultSet that came from our query
             while (rs.next() ) // if rs == null, then there is no ResultSet to view  
             {
-                System.out.println("hopefully only one"+ rs.getString("question1"));
+                System.out.println("hopefully only one "+ rs.getString("question1"));
                 question.add(rs.getString("question1"));
                 question.add(rs.getString("question2"));
                 question.add(rs.getString("question3"));
