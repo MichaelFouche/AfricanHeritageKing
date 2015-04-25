@@ -66,4 +66,4 @@ INSERT INTO imageData values('imgID17','Abu Simbel','Great Mosque of Djenné','M
 INSERT INTO imageData values('imgID18','Kairouan','The Kasubi Tombs','Royal Palaces of Abomey','Old Town of Ghadamès','The Kasubi Tombs' );
 INSERT INTO imageData values('imgID19','Timgad','Wadi Al-Hitan','Basilica of St. Crispinus','Medina of Tunis','Basilica of St. Crispinus' );
 INSERT INTO imageData values('imgID20','Mount Kenya National Park','Simien National Park','Niokolo-Koba National Park','Mount Nimba Strict Nature Reserve','The Rwenzori Mountains' );
-INSERT INTO gamepool VALUES ('foosh','');
+

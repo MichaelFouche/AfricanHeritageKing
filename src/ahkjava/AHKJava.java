@@ -91,6 +91,7 @@ public class AHKJava implements ActionListener{
     boolean flagInGame;
     
     ArrayList<ArrayList<String>> poolList;
+    String btnJoinPoolText ;
     
     
     public AHKJava() throws SQLException
@@ -99,6 +100,7 @@ public class AHKJava implements ActionListener{
         loggedInUsername = "";
         poolSize = 0;        
         flagInGame = false;
+        btnJoinPoolText = "Join Pool";
         
         ses.scheduleAtFixedRate(new Runnable() 
         {
@@ -133,28 +135,7 @@ public class AHKJava implements ActionListener{
                 //System.out.println("execute the timer query");
                 //Update Pool
                 //check if user in pool, then whether the user was matched yet to another user.           
-                panelPool.removeAll();
-                addGamePoolToGUI();
-                panelPool.revalidate();
-                panelPool.repaint();
-                panelPool.updateUI();
-                //System.out.println("refresh");
-                //System.out.println("loggedInUsername: "+loggedInUsername + "\tflagInGame: "+flagInGame);
-                if(loggedInUsername.equals("")&&!flagInGame)
-                {
-                    gameTimeEnable(false);
-                    gamePoolEnable(false);
-                }
-                else if(flagInGame)
-                {
-                    gameTimeEnable(true);
-                    gamePoolEnable(false);
-                }
-                else if(!loggedInUsername.equals("")&&!flagInGame)
-                {
-                    gameTimeEnable(false);
-                    gamePoolEnable(true);
-                }
+                updatePoolPanel();
                     
                 
             }
@@ -163,7 +144,7 @@ public class AHKJava implements ActionListener{
     } 
     
     
-
+    
 
     private Connection conn;  
 
@@ -428,6 +409,31 @@ public class AHKJava implements ActionListener{
          //END OF PANEL POOL
          
      }
+     public void updatePoolPanel()
+     {
+        panelPool.removeAll();
+        addGamePoolToGUI();
+        panelPool.revalidate();
+        panelPool.repaint();
+        panelPool.updateUI();
+        //System.out.println("refresh");
+        //System.out.println("loggedInUsername: "+loggedInUsername + "\tflagInGame: "+flagInGame);
+        if(loggedInUsername.equals("")&&!flagInGame)
+        {
+            gameTimeEnable(false);
+            gamePoolEnable(false);
+        }
+        else if(flagInGame)
+        {
+            gameTimeEnable(true);
+            gamePoolEnable(false);
+        }
+        else if(!loggedInUsername.equals("")&&!flagInGame)
+        {
+            gameTimeEnable(false);
+            gamePoolEnable(true);
+        }
+     }
      public void gamePoolEnable(boolean flag)
      {
          for(int a=0;a<poolList.size();a++)
@@ -649,22 +655,39 @@ public class AHKJava implements ActionListener{
                     JOptionPane.showMessageDialog(null, "You are already in the pool","AHK - Pool",JOptionPane.ERROR_MESSAGE);
                 }
                 else if(dbc.addUserToPool(loggedInUsername))
-                {
-                    System.out.println("User added to pool");
-                    btnAddUserToPool.setText("Leave Pool");
+                {                    
+                    btnJoinPoolText = "Leave Pool";
+                    btnAddUserToPool.setText(btnJoinPoolText);
                 }
             }
             else
             {
+                if(dbc.checkUserInPool(loggedInUsername))
+                {
+                    if(userAvailable(loggedInUsername)
+                    {
+                        removeUserFromPool(loggedInUsername);
+                        btnJoinPoolText = "Join Pool";
+                        btnAddUserToPool.setText(btnJoinPoolText);
+                    }
+                    else
+                    {
+                        JOptionPane.showMessageDialog(null, "You are not in the pool","AHK - Pool",JOptionPane.ERROR_MESSAGE);
+                    }
+
+                }
+                else
+                {
+                    JOptionPane.showMessageDialog(null, "You are not in the pool","AHK - Pool",JOptionPane.ERROR_MESSAGE);
+                    btnJoinPoolText = "Join Pool";
+                    btnAddUserToPool.setText(btnJoinPoolText);
+                    updatePoolPanel();
+                }
                 btnAddUserToPool.setText("Join Pool");
             }
             
             
-        }
-       /* if(e.getSource()==btnRemoveUserFromPool)
-        {
-            //check eers of al gematch is en dan remove
-        }*/
+        }        
             
         if(e.getSource()==btnSubmitAnswer)
         {

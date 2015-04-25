@@ -716,7 +716,7 @@ public class DBCommunicator {
     /*delete from gamepool
         delete matchSession
     delete from users*/
-    public boolean deleteGame(String uname )
+    public boolean removeUserFromPool(String uname )
     {
         boolean success = false;
         
