@@ -336,7 +336,7 @@ public class AHKJava implements ActionListener{
          jf.add(panelPool, BorderLayout.WEST);
          jf.add(panelGame, BorderLayout.EAST);
          jf.add(panelSouth, BorderLayout.SOUTH);
-         jf.pack();
+         jf.setSize(1300,700);
          jf.setDefaultCloseOperation(jf.EXIT_ON_CLOSE);
          /*
          jfQ.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE); //DISPOSE_ON_CLOSE,  DISPOSE_ON_CLOSE 
@@ -600,7 +600,7 @@ public class AHKJava implements ActionListener{
          questionForGameImage = dbc.requestQuestionForImage(imageID.substring(0, imageID.length() - 4));
          try
          {              
-            BufferedImage bi = ImageIO.read(getClass().getResource("tablemountain.jpg"));
+            BufferedImage bi = ImageIO.read(getClass().getResource("resources/images/"+imageID));
             ImageIcon image = new ImageIcon(bi); 
             lblGamePic.setIcon(image);
             //panelGameW.add(lblGamePic );
@@ -621,19 +621,17 @@ public class AHKJava implements ActionListener{
              System.out.println("Error setting radiobuttons \n"+e);
          }
          currentImageViewing=currentImageViewing+1;
-         if(currentImageViewing>allImagesForGame.size())
+         if(currentImageViewing>allImagesForGame.size()-1)
          {
              currentImageViewing=0;
          }
+         
          System.out.println("currentImageViewing: "+currentImageViewing);
+         //need to update that entire center panel to allow the length of each place to not f**k everything up
          
-         //update label with image
-         
-         //update all the questions
          //set the question number
          //set the amount of correct answers
          
-         //if at end of questions, set the currentImageViewing to zero
      }
      
      public void actionPerformed(ActionEvent e)
@@ -747,7 +745,8 @@ public class AHKJava implements ActionListener{
                 {
                     String userToJoin = lblUser[a].getText();
                     if(dbc.userAvailable(userToJoin))
-                    {                        
+                    {  
+                        getNextQuestion();
                         dbc.joinUserInPool(loggedInUsername,userToJoin);
                         gameTimeEnable(true);
                         gamePoolEnable(false);
