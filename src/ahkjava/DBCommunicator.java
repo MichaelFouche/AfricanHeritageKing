@@ -8,6 +8,7 @@ package ahkjava;
 import com.mysql.jdbc.Driver;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -395,7 +396,7 @@ public class DBCommunicator {
                 System.out.println("User Joined in Pool");
         }
         else
-            System.out.println("not available");
+            System.out.println("Joining user in pool not available anymore");
         return joinedPool;
     }
     
@@ -426,6 +427,33 @@ public class DBCommunicator {
         
         return available;
     }
+    public String matchFoundInPool(String uname)
+    {
+        String opponentUsername = "";
+        
+        try
+        {
+            conn = makeConnection();
+            
+            Statement s = conn.createStatement();
+            
+            s.execute("SELECT opponentUserID FROM GamePool where UserID = '"+uname+"' and opponentUserID not like '';"); //check user in pool            
+            ResultSet rs = s.getResultSet(); // get any ResultSet that came from our query
+            while (rs.next() ) // if rs == null, then there is no ResultSet to view  
+            {
+               opponentUsername = rs.getString("opponentUserID");
+            }
+            s.close(); // close the Statement to let the database know we're done with it
+            conn.close();
+            conn = null;
+        }
+        catch(Exception e)
+        {
+            System.out.println(e);
+        }
+        
+        return opponentUsername;
+    }
     
     public boolean connectToUser(String uname, String oppoName)
     {
@@ -437,19 +465,22 @@ public class DBCommunicator {
             
             Statement s = conn.createStatement();
             
-            s.execute("UPDATE GamePool SET opponentUserID = '"+oppoName+"'where UserID = '"+uname+"';");           
-            ResultSet rs = s.getResultSet(); // get any ResultSet that came from our query
-            while (rs.next() ) // if rs == null, then there is no ResultSet to view  
-            {
-               connected = true;
-            }
+            String query = ("UPDATE GamePool SET opponentUserID = ? where UserID = ? ");    
+            PreparedStatement preparedStmt = conn.prepareStatement(query);
+            preparedStmt.setString(1, uname);
+            preparedStmt.setString(2, oppoName);
+ 
+      // execute the java preparedstatement
+            preparedStmt.executeUpdate();
             s.close(); // close the Statement to let the database know we're done with it
             conn.close();
             conn = null;
+            connected = true;
+            System.out.println("GamePool joining opponent:"+oppoName+"\tUser: "+uname);
         }
         catch(Exception e)
         {
-            System.out.println(e);
+            System.out.println("Update gamepool to add userID in the opponent slot "+e);
         }
         
         return connected;

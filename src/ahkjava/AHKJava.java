@@ -92,6 +92,7 @@ public class AHKJava implements ActionListener{
     
     ArrayList<ArrayList<String>> poolList;
     String btnJoinPoolText ;
+    String opponentUsername;
     
     
     public AHKJava() throws SQLException
@@ -101,6 +102,7 @@ public class AHKJava implements ActionListener{
         poolSize = 0;        
         flagInGame = false;
         btnJoinPoolText = "Join Pool";
+        opponentUsername = "";
         
         ses.scheduleAtFixedRate(new Runnable() 
         {
@@ -134,7 +136,18 @@ public class AHKJava implements ActionListener{
             {
                 //System.out.println("execute the timer query");
                 //Update Pool
-                //check if user in pool, then whether the user was matched yet to another user.           
+                //check if user in pool, then whether the user was matched yet to another user. 
+                opponentUsername = dbc.matchFoundInPool(loggedInUsername);
+                if(!opponentUsername.equals(""))
+                {
+                    dbc.removeUserFromPool(loggedInUsername);
+                    gameTimeEnable(true);
+                    gamePoolEnable(false);
+                    progressSize = 60;
+                    gameTimeLeft = true;
+                    flagInGame = true;
+                    //start game.
+                }
                 updatePoolPanel();
                     
                 
@@ -647,12 +660,20 @@ public class AHKJava implements ActionListener{
                 if(e.getSource()==btnJoin[a])
                 {
                     String userToJoin = lblUser[a].getText();
-                    //check if still in pool, 
-                    gameTimeEnable(true);
-                    gamePoolEnable(false);
-                    progressSize = 60;
-                    gameTimeLeft = true;
-                    flagInGame = true;
+                    if(dbc.userAvailable(userToJoin))
+                    {                        
+                        dbc.joinUserInPool(loggedInUsername,userToJoin);
+                        gameTimeEnable(true);
+                        gamePoolEnable(false);
+                        progressSize = 60;
+                        gameTimeLeft = true;
+                        flagInGame = true;
+                    }
+                    else
+                    {
+                        JOptionPane.showMessageDialog(null, "Sorry, the user is not available anymore","AHK - Pool",JOptionPane.ERROR_MESSAGE);
+                    }
+                    
                 }
             }
         }
