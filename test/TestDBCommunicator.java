@@ -56,7 +56,7 @@ public class TestDBCommunicator {
         Assert.assertTrue(dbc.deleteUser("rynom"));
     }
     
-    @Test (enabled = true)
+    @Test (enabled = false)
     public void GamePool()
     {   Assert.assertTrue(dbc.addUser("rynom", "rmayer@outlook.com", "mayer123"));
         
@@ -93,6 +93,12 @@ public class TestDBCommunicator {
 
         
         Assert.assertTrue(dbc.deleteMatch(1));
+    }
+    
+    @Test (enabled = true)
+    public void game(){
+         //Assert.assertEquals(dbc.createMatch("1", "foosh", "ryno", 1, 0), 1);
+         Assert.assertEquals(dbc.getNextMatchID(),2);
     }
     
     @BeforeClass

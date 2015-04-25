@@ -498,7 +498,7 @@ public class DBCommunicator {
             Statement insert = conn.createStatement();
             Statement s = conn.createStatement();
             
-            insert.execute("INSERT INTO matchSession (matchID, userID, oppponentUserID, currentQuestion, currentMatchScore) Values( '"+matchID+"','"+userID+"' ,'"+opponentUserID+"','"+currentQuestion+"' ,'"+currentMatchScore+"';"); // insert the data to the table
+            insert.execute("INSERT INTO matchSession (matchID, userID, opponentUserID, currentQuestion, currentMatchScore) Values( '"+matchID+"','"+userID+"' ,'"+opponentUserID+"','"+currentQuestion+"' ,'"+currentMatchScore+"');"); // insert the data to the table
             s.execute("Select matchSessionID from matchSession where matchID  = '"+matchID+"';"); //check data inserted
             
             ResultSet rs = s.getResultSet(); // get any ResultSet that came from our query
@@ -536,6 +536,7 @@ public class DBCommunicator {
             if (rs.last() ) // if rs == null, then there is no ResultSet to view  
             {
                prevMatchID = rs.getInt("matchID");
+               System.out.println("prev matchID " + prevMatchID);
             }
             s.close(); // close the Statement to let the database know we're done with it
             conn.close();
@@ -546,8 +547,9 @@ public class DBCommunicator {
              System.out.println(e);
              
          }
-        
-        return prevMatchID++;
+        prevMatchID++;
+        //return prevMatchID++;
+        return prevMatchID;
     }
     
         /*
