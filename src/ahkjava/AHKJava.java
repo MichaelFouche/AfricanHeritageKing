@@ -377,6 +377,7 @@ public class AHKJava implements ActionListener{
              ArrayList<String> currentList = poolList.get(i);
              lblUser[i] = new JLabel(currentList.get(0));
             // System.out.println("");
+
              lblScore[i] = new JLabel(currentList.get(1));
              btnJoin[i] = new JButton("Join");
              btnJoin[i].addActionListener(this);
