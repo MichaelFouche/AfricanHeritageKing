@@ -133,8 +133,9 @@ public class AHKJava implements ActionListener{
                 //check if user in pool, then whether the user was matched yet to another user.                
                 poolList = dbc.getPoolList();
                 poolSize = poolList.size();
-                panelPoolN.revalidate();
-                panelPoolN.repaint();
+                addGamePoolToGUI();
+                panelPool.revalidate();
+                panelPool.repaint();
                 System.out.println("refresh");
                 
             }
@@ -237,75 +238,8 @@ public class AHKJava implements ActionListener{
          panelHeading.add(panelLogo,BorderLayout.WEST);
          panelHeading.add(panelLogin,BorderLayout.EAST);
          
-         //--PANEL POOL
-         
-         
-         panelPool = new JPanel(new BorderLayout(2,2));
-         panelPool.setBorder(new TitledBorder("Game Pool"));
-         panelPoolN = new JPanel();
-         panelPoolS = new JPanel();
-         
-         poolList = dbc.getPoolList();  
-         poolSize = poolList.size();
-         poolList = dbc.getPoolList();    
-         lblUser = new JLabel[poolSize];
-         lblScore = new JLabel[poolSize];
-         btnJoin = new JButton[poolSize];
-         
-           
-         for(int i=0;i<poolSize;i++)
-         {
-             ArrayList<String> currentList = poolList.get(i);
-             lblUser[i] = new JLabel(currentList.get(0));
-             lblScore[i] = new JLabel(currentList.get(1));
-             btnJoin[i] = new JButton("Join");
-             btnJoin[i].addActionListener(this);
-         }
-         
-         //get the amount of users in pool, then print those, and print empty labels for the rest (10rows) to display nicely.
-         JPanel panel;
-         if(poolSize<11)
-         {
-             panel = new JPanel(new GridLayout(10,3) );
-         }
-         else
-         {
-             panel = new JPanel(new GridLayout(poolSize,3) );             
-         }
-         
-         for (int i = 0; i < poolSize; i++) 
-         {             
-            panel.add(lblUser[i]);
-            panel.add(lblScore[i]);
-            panel.add(btnJoin[i]);
-         }
-         if(poolSize<11)
-         {
-            for(int i=0;i<10-poolSize;i++)
-            {
-               panel.add(new JLabel(""));
-               panel.add(new JLabel(""));
-               panel.add(new JLabel(""));
-            }    
-         }
-         
-         scrollPane = new JScrollPane(panel);
-         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-         scrollPane.setBounds(10, 10, 400, 300);
-         contentPane = new JPanel(null);
-         contentPane.setPreferredSize(new Dimension(450, 300));
-         contentPane.add(scrollPane);
-         panelPoolN.add(contentPane);
-         
-         btnAddUserToPool = new JButton("Join Pool");
-         btnAddUserToPool.addActionListener(this);
-         
-         panelPoolS.add(btnAddUserToPool);
-         
-         panelPool.add(panelPoolN,BorderLayout.NORTH);
-         panelPool.add(panelPoolS, BorderLayout.SOUTH);
-         //END OF PANEL POOL
-         
+         //PANEL POOL
+         this.addGamePoolToGUI();
          //GAME PANEL
          
          
@@ -401,6 +335,76 @@ public class AHKJava implements ActionListener{
         });
          */
          jf.setVisible(true);
+     }
+     public void addGamePoolToGUI()
+     {
+         //--PANEL POOL   
+         
+         panelPool = new JPanel(new BorderLayout(2,2));
+         panelPool.setBorder(new TitledBorder("Game Pool"));
+         panelPoolN = new JPanel();
+         panelPoolS = new JPanel();
+         
+         poolList = dbc.getPoolList();  
+         poolSize = poolList.size();
+         poolList = dbc.getPoolList();    
+         lblUser = new JLabel[poolSize];
+         lblScore = new JLabel[poolSize];
+         btnJoin = new JButton[poolSize];
+         
+           
+         for(int i=0;i<poolSize;i++)
+         {
+             ArrayList<String> currentList = poolList.get(i);
+             lblUser[i] = new JLabel(currentList.get(0));
+             lblScore[i] = new JLabel(currentList.get(1));
+             btnJoin[i] = new JButton("Join");
+             btnJoin[i].addActionListener(this);
+         }
+         
+         //get the amount of users in pool, then print those, and print empty labels for the rest (10rows) to display nicely.
+         JPanel panel;
+         if(poolSize<11)
+         {
+             panel = new JPanel(new GridLayout(10,3) );
+         }
+         else
+         {
+             panel = new JPanel(new GridLayout(poolSize,3) );             
+         }
+         
+         for (int i = 0; i < poolSize; i++) 
+         {             
+            panel.add(lblUser[i]);
+            panel.add(lblScore[i]);
+            panel.add(btnJoin[i]);
+         }
+         if(poolSize<11)
+         {
+            for(int i=0;i<10-poolSize;i++)
+            {
+               panel.add(new JLabel(""));
+               panel.add(new JLabel(""));
+               panel.add(new JLabel(""));
+            }    
+         }
+         
+         scrollPane = new JScrollPane(panel);
+         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+         scrollPane.setBounds(10, 10, 400, 300);
+         contentPane = new JPanel(null);
+         contentPane.setPreferredSize(new Dimension(450, 300));
+         contentPane.add(scrollPane);
+         panelPoolN.add(contentPane);
+         
+         btnAddUserToPool = new JButton("Join Pool");
+         btnAddUserToPool.addActionListener(this);
+         
+         panelPoolS.add(btnAddUserToPool);
+         
+         panelPool.add(panelPoolN,BorderLayout.NORTH);
+         panelPool.add(panelPoolS, BorderLayout.SOUTH);
+         //END OF PANEL POOL
      }
      public void gamePoolEnable(boolean flag)
      {
@@ -524,7 +528,7 @@ public class AHKJava implements ActionListener{
                     {
                         if(dbc.usernameMatchPassword(uname, pw))
                         {
-                            poolList = dbc.getPoolList();  
+                            //poolList = dbc.getPoolList();  
                             loggedInUsername = uname;
                             txtLogin.setEnabled(false);
                             txtPW.setEnabled(false);
