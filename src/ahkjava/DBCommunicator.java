@@ -547,8 +547,8 @@ public class DBCommunicator {
              System.out.println("Error in getNextMatchID: \n"+e);
              
          }
-        
-        return prevMatchID++;
+        prevMatchID = prevMatchID+1;
+        return prevMatchID;
     }
     
         /*
