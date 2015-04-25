@@ -326,6 +326,7 @@ public class DBCommunicator {
         boolean added = false;
         if(!checkUserInPool(uname))
         {
+            System.out.println("user not in pool");
             //add to pool
             try
             {
