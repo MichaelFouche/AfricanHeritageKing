@@ -53,27 +53,26 @@ public class TestDBCommunicator {
         Assert.assertTrue(dbc.passwordMatch("mayer123", "mayer123"));
         Assert.assertFalse(dbc.passwordMatch("mayer123", "may1"));
         Assert.assertTrue(dbc.addUser("rynom", "rmayer@outlook.com", "mayer123"));
-       // Assert.assertTrue(dbc.deleteUser("rynom"));
+        Assert.assertTrue(dbc.deleteUser("rynom"));
     }
     
     @Test (enabled = true)
     public void GamePool()
-    {
+    {   Assert.assertTrue(dbc.addUser("rynom", "rmayer@outlook.com", "mayer123"));
+        
         ArrayList<ArrayList<String>> poolList = dbc.getPoolList();
         Assert.assertNotNull(poolList);
-        Assert.assertTrue(dbc.addUserToPool("ryno"));
+        Assert.assertTrue(dbc.addUserToPool("rynom"));
         Assert.assertTrue(dbc.checkUserInPool("ryno"));
         Assert.assertFalse(dbc.checkUserInPool("batman"));
         Assert.assertTrue(dbc.joinUserInPool("foosh", "ryno"));
         Assert.assertTrue(dbc.connectToUser("foosh", "ryno"));
-        Assert.assertTrue(dbc.connectToUser("foosh", "batman"));
+        Assert.assertFalse(dbc.connectToUser("foosh", "batman"));
         Assert.assertFalse(dbc.userAvailable("foosh"));
         Assert.assertEquals(dbc.getNextMatchID(),2);
-        
-        Assert.assertTrue(dbc.addUser("rynom", "rmayer@outlook.com", "mayer123"));
-        Assert.assertTrue(dbc.addUserToPool("rynom"));
         Assert.assertTrue(dbc.userAvailable("rynom"));
         //delete match
+        Assert.assertTrue(dbc.deleteUser("rynom"));
         //Assert.assertTrue(dbc.deleteGame("rynom"));
     }
     

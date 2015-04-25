@@ -326,6 +326,7 @@ public class DBCommunicator {
         boolean added = false;
         if(!checkUserInPool(uname))
         {
+            System.out.println("user not in pool");
             //add to pool
             try
             {
@@ -410,7 +411,7 @@ public class DBCommunicator {
             
             Statement s = conn.createStatement();
             
-            s.execute("SELECT UserID FROM GamePool where UserID = '"+uname+"' and opponentUserID = '';"); //check user in pool            
+            s.execute("SELECT UserID FROM GamePool where UserID = '"+uname+"' and opponentUserID IS NULL;"); //check user in pool            
             ResultSet rs = s.getResultSet(); // get any ResultSet that came from our query
             while (rs.next() ) // if rs == null, then there is no ResultSet to view  
             {
