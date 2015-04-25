@@ -83,6 +83,7 @@ public class AHKJava implements ActionListener{
     JScrollPane scrollPane;
     JPanel contentPane;
     int poolSize;
+    String imageID;
     
     JButton btnSubmitAnswer;
     //variables
@@ -100,6 +101,7 @@ public class AHKJava implements ActionListener{
     String btnJoinPoolText ;
     String opponentUsername;
     int currentImageViewing;
+    int sessionID;
     
     
     public AHKJava() throws SQLException
@@ -293,8 +295,11 @@ public class AHKJava implements ActionListener{
              System.out.println("createAHKGui(load image): \n"+e);
          }
          rbc1 = new JRadioButton("Choice 1");
+         rbc1.addActionListener(this);
          rbc2 = new JRadioButton("Choice 2");
+         rbc1.addActionListener(this);
          rbc3 = new JRadioButton("Choice 3");
+         rbc1.addActionListener(this);
          rbc4 = new JRadioButton("Choice 4");
          
          rbGroup = new ButtonGroup();
@@ -595,7 +600,7 @@ public class AHKJava implements ActionListener{
      public void getNextQuestion()
      {
          System.out.println("size: "+allImagesForGame.size());
-         String imageID = allImagesForGame.get(currentImageViewing);
+         imageID = allImagesForGame.get(currentImageViewing);
         
          System.out.println("Imageid: "+imageID.substring(0, imageID.length() - 4));
          questionForGameImage = dbc.requestQuestionForImage(imageID.substring(0, imageID.length() - 4));
@@ -756,7 +761,7 @@ public class AHKJava implements ActionListener{
                         flagInGame = true;
                         try
                         {
-                            int sessionID = dbc.createMatch(dbc.getNextMatchID(), loggedInUsername, userToJoin, 0, 0);
+                            sessionID = dbc.createMatch(dbc.getNextMatchID(), loggedInUsername, userToJoin, 0, 0);
                             System.out.println("Session: "+sessionID);
                         }
                         catch(Exception ee)
@@ -822,7 +827,37 @@ public class AHKJava implements ActionListener{
             
         if(e.getSource()==btnSubmitAnswer)
         {
+            String answerText = "";
+            if(rbc1.isSelected())
+            {
+                answerText = rbc1.getText();
+            }
+            else if(rbc2.isSelected())
+            {
+                answerText = rbc2.getText();
+            }
+            else if(rbc3.isSelected())
+            {
+                answerText = rbc3.getText();
+            }
+            else if(rbc4.isSelected())
+            {
+                answerText = rbc4.getText();
+            }
+            else
+            {
+                JOptionPane.showMessageDialog(null, "Oops, you didn't select an answer","AHK - Pool",JOptionPane.ERROR_MESSAGE);
+            }
+            
             System.out.println("Check question and get next");
+            System.out.println("Selected radiobutton: "+answerText);
+            boolean answerCorrect = dbc.submitAnswer(imageID.substring(0, imageID.length() - 4),answerText);
+            System.out.println("previous answer result: "+answerCorrect);
+            dbc.updateAnswer(sessionID, loggedInUsername,answerCorrect);
+            System.out.println("Current Question = "+dbc.getCurrentQuestionForUser(sessionID, loggedInUsername));
+            //get the radio button selected
+            //match the rb text to the asnwer for the question
+            //add the mark if correct
             getNextQuestion();
         }
     }

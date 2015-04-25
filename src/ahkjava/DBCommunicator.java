@@ -481,7 +481,7 @@ public class DBCommunicator {
         }
         catch(Exception e)
         {
-            System.out.println("Update gamepool to add userID in the opponent slot "+e);
+            System.out.println("Update matchsession to add userID in the opponent slot "+e);
         }
         
         return connected;
@@ -603,14 +603,16 @@ public class DBCommunicator {
             
             Statement s = conn.createStatement();
             
-            s.execute("Select answer from questions where imageID = '"+imageID+"';"); //check data inserted
+            s.execute("Select answer from imagedata where imageID = '"+imageID+"';"); //check data inserted
             
             ResultSet rs = s.getResultSet(); // get any ResultSet that came from our query
             if (rs.next() ) // if rs == null, then there is no ResultSet to view  
             {
-                    if(answer.matches(rs.getString("answer")))
-                        correct = true;
-                
+                if(answer.equals(rs.getString("answer")))
+                {
+                    correct = true;
+                }
+                                    
             }
             s.close(); // close the Statement to let the database know we're done with it
             conn.close();
@@ -623,6 +625,41 @@ public class DBCommunicator {
         
         return correct;
         
+    }
+    public void updateAnswer(int matchID,String userID,   Boolean correct)
+    {
+        try
+         {
+            conn = makeConnection();
+            
+            Statement s = conn.createStatement();
+            String query ;
+            if(correct)
+            {
+                query = ("UPDATE matchsession currentQuestion = currentQuestion+1, currentMatchScore = currentMatchScore+1 where matchID = ? and userID = ? ;"); // insert the data to the table
+            }
+            else
+            {
+                query = ("UPDATE matchsession currentQuestion = currentQuestion+1 where matchID = ? and userID = ? ;"); // insert the data to the table                
+            }
+            PreparedStatement preparedStmt = conn.prepareStatement(query);
+            preparedStmt.setInt(1, matchID);
+            preparedStmt.setString(2, userID);
+            
+ 
+      // execute the java preparedstatement
+            preparedStmt.executeUpdate();
+            
+            
+            s.close();            
+            conn.close();
+            conn = null;
+         }
+         catch(Exception e)
+         {
+             System.out.println(e);
+             
+         }
     }
     public int getResults(String matchID,String userID, String opponentUserID)
     {
@@ -684,7 +721,7 @@ public class DBCommunicator {
         return score;
     }
     
-    public int getCurrentQuestionForUser(String matchID,String userName)
+    public int getCurrentQuestionForUser(int matchID,String userName)
     {
         int currentQuestion = 0;
         
