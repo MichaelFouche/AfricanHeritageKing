@@ -399,7 +399,11 @@ public class AHKJava implements ActionListener{
          contentPane.add(scrollPane);
          panelPoolN.add(contentPane);
          
-         btnAddUserToPool = new JButton("Join Pool");
+         if(dbc.checkUserInPool(loggedInUsername))
+         {
+            btnJoinPoolText = "Leave Pool";
+         }
+         btnAddUserToPool = new JButton(btnJoinPoolText);
          btnAddUserToPool.addActionListener(this);
          
          panelPoolS.add(btnAddUserToPool);
@@ -556,6 +560,11 @@ public class AHKJava implements ActionListener{
                     {
                         if(dbc.usernameMatchPassword(uname, pw))
                         {
+                            if(dbc.checkUserInPool(loggedInUsername))
+                            {
+                                btnJoinPoolText = "Leave Pool";
+                                btnAddUserToPool.setText(btnJoinPoolText);
+                            }
                             //poolList = dbc.getPoolList();  
                             loggedInUsername = uname;
                             txtLogin.setEnabled(false);
@@ -564,6 +573,7 @@ public class AHKJava implements ActionListener{
                             btnSignIn.setText("Sign Out");
                             gameTimeEnable(false);
                             gamePoolEnable(true);
+                            updatePoolPanel();
                         }
                         else
                         {
@@ -653,22 +663,26 @@ public class AHKJava implements ActionListener{
                 if(dbc.checkUserInPool(loggedInUsername))
                 {
                     JOptionPane.showMessageDialog(null, "You are already in the pool","AHK - Pool",JOptionPane.ERROR_MESSAGE);
+                    btnJoinPoolText = "Leave Pool";
+                    btnAddUserToPool.setText(btnJoinPoolText);
                 }
                 else if(dbc.addUserToPool(loggedInUsername))
                 {                    
                     btnJoinPoolText = "Leave Pool";
                     btnAddUserToPool.setText(btnJoinPoolText);
+                    updatePoolPanel();
                 }
             }
             else
             {
                 if(dbc.checkUserInPool(loggedInUsername))
                 {
-                    if(userAvailable(loggedInUsername)
+                    if(dbc.userAvailable(loggedInUsername))
                     {
-                        removeUserFromPool(loggedInUsername);
+                        dbc.removeUserFromPool(loggedInUsername);
                         btnJoinPoolText = "Join Pool";
                         btnAddUserToPool.setText(btnJoinPoolText);
+                        updatePoolPanel();
                     }
                     else
                     {

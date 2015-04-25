@@ -15,8 +15,7 @@ CREATE TABLE GamePool
 (
 	userID				VARCHAR(10) PRIMARY KEY,	
 	opponentUserID                  VARCHAR(10),
-	CONSTRAINT fk_GamePool_userID FOREIGN KEY (userID) REFERENCES Users(userID),
-	CONSTRAINT fk_GamePool_opponentUserID FOREIGN KEY (opponentUserID) REFERENCES Users(userID)
+	CONSTRAINT fk_GamePool_userID FOREIGN KEY (userID) REFERENCES Users(userID)
 );
 
 CREATE TABLE MatchSession
