@@ -535,6 +535,7 @@ public class DBCommunicator {
             ResultSet rs = s.getResultSet(); // get any ResultSet that came from our query
             if (rs.next() ) // if rs == null, then there is no ResultSet to view  
             {
+                System.out.println("MatchID: "+rs.getInt("matchID"));
                prevMatchID = rs.getInt("matchID");
             }
             
