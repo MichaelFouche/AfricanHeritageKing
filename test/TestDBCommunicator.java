@@ -56,7 +56,7 @@ public class TestDBCommunicator {
         Assert.assertTrue(dbc.deleteUser("rynom"));
     }
     
-    @Test (enabled = false)
+    @Test (enabled = true)
     public void GamePool()
     {
         ArrayList<ArrayList<String>> poolList = dbc.getPoolList();
