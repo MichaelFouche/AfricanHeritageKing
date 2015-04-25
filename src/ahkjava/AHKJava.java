@@ -595,18 +595,37 @@ public class AHKJava implements ActionListener{
      {
          System.out.println("size: "+allImagesForGame.size());
          String imageID = allImagesForGame.get(currentImageViewing);
-         questionForGameImage = dbc.requestQuestionForImage(imageID);
+        
+         System.out.println("Imageid: "+imageID.substring(0, imageID.length() - 4));
+         questionForGameImage = dbc.requestQuestionForImage(imageID.substring(0, imageID.length() - 4));
          try
          {              
-            BufferedImage bi = ImageIO.read(getClass().getResource("ahkLogo.JPG"));
+            BufferedImage bi = ImageIO.read(getClass().getResource("tablemountain.jpg"));
             ImageIcon image = new ImageIcon(bi); 
             lblGamePic.setIcon(image);
             //panelGameW.add(lblGamePic );
          }
          catch(Exception e)
          {
-             System.out.println("createAHKGui(load image): \n"+e);
+             System.out.println("getNextQuestion(load image): \n"+e);
          }
+         try
+         {
+            rbc1.setText(questionForGameImage.get(0));
+            rbc2.setText(questionForGameImage.get(1));
+            rbc3.setText(questionForGameImage.get(2));
+            rbc4.setText(questionForGameImage.get(3));
+         }
+         catch(Exception e)
+         {
+             System.out.println("Error setting radiobuttons \n"+e);
+         }
+         currentImageViewing=currentImageViewing+1;
+         if(currentImageViewing>allImagesForGame.size())
+         {
+             currentImageViewing=0;
+         }
+         System.out.println("currentImageViewing: "+currentImageViewing);
          
          //update label with image
          
