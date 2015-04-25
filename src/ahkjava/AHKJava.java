@@ -452,7 +452,7 @@ public class AHKJava implements ActionListener{
      {
          btnSubmitAnswer.setEnabled(flag);
          pbGame.setEnabled(flag);
-         lblGamePic.setEnabled(flag);
+         lblGamePic.setEnabled(true);
          rbc1.setEnabled(flag);
          rbc2.setEnabled(flag);
          rbc3.setEnabled(flag);
@@ -625,6 +625,8 @@ public class AHKJava implements ActionListener{
                 System.out.println("poolSize: "+poolSize);
                 if(e.getSource()==btnJoin[a])
                 {
+                    String userToJoin = lblUser[a].getText();
+                    //check if still in pool, 
                     gameTimeEnable(true);
                     gamePoolEnable(false);
                     progressSize = 60;
@@ -654,6 +656,11 @@ public class AHKJava implements ActionListener{
             
             
         }
+       /* if(e.getSource()==btnRemoveUserFromPool)
+        {
+            //check eers of al gematch is en dan remove
+        }*/
+            
         if(e.getSource()==btnSubmitAnswer)
         {
             System.out.println("Check question and get next");
