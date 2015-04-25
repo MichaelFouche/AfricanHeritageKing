@@ -377,7 +377,7 @@ public class DBCommunicator {
         {
             joinedPool = connectToUser(uname, oppoName);
             if(joinedPool)
-                System.out.println("Success");
+                System.out.println("User Joined in Pool");
         }
         else
             System.out.println("not available");
@@ -394,7 +394,7 @@ public class DBCommunicator {
             
             Statement s = conn.createStatement();
             
-            s.execute("SELECT UserID FROM GamePool where UserID = '"+uname+"' and opponentUserID = null;"); //check user in pool            
+            s.execute("SELECT UserID FROM GamePool where UserID = '"+uname+"' and opponentUserID = '';"); //check user in pool            
             ResultSet rs = s.getResultSet(); // get any ResultSet that came from our query
             while (rs.next() ) // if rs == null, then there is no ResultSet to view  
             {

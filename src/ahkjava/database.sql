@@ -44,6 +44,7 @@ CREATE TABLE imageData
 
 
 INSERT INTO users values('foosh','foosh@outlook.com','1@3',0);
+INSERT INTO users values('ryno','ryno@outlook.com','12',0);
 
 INSERT INTO imageData Values('imgID1','Ruines of Carthage','Axum Northern Stelea Park','Volubilis Basilica','Abu Simbel','Axum Northern Stelea Park' );
 INSERT INTO imageData Values('imgID2','Amphitheatre of El Jem','Colloseum','Leptis Magna','Ancient Thebes','Amphitheatre of El Jem' );
@@ -65,3 +66,4 @@ INSERT INTO imageData values('imgID17','Abu Simbel','Great Mosque of Djenné','M
 INSERT INTO imageData values('imgID18','Kairouan','The Kasubi Tombs','Royal Palaces of Abomey','Old Town of Ghadamès','The Kasubi Tombs' );
 INSERT INTO imageData values('imgID19','Timgad','Wadi Al-Hitan','Basilica of St. Crispinus','Medina of Tunis','Basilica of St. Crispinus' );
 INSERT INTO imageData values('imgID20','Mount Kenya National Park','Simien National Park','Niokolo-Koba National Park','Mount Nimba Strict Nature Reserve','The Rwenzori Mountains' );
+INSERT INTO gamepool VALUES ('foosh','');
