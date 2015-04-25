@@ -563,24 +563,19 @@ public class DBCommunicator {
     public ArrayList<String> requestQuestionForImage(String imageID)
     {
         ArrayList<String> question = new ArrayList<String>();
-        
          try
         {
-            conn = makeConnection();
-            
-            Statement s = conn.createStatement();
-            
-            s.execute("Select question1, question2, question3, question4 from imgData where imageID = '"+imageID+"';"); //check data inserted
-            
+            conn = makeConnection();            
+            Statement s = conn.createStatement();             
+            s.execute("Select question1, question2, question3, question4 from imagedata where imageID = '"+imageID+"';"); //check data inserted
             ResultSet rs = s.getResultSet(); // get any ResultSet that came from our query
             while (rs.next() ) // if rs == null, then there is no ResultSet to view  
             {
-                int i = 1;
-                while(i <= 4 )
-                {
-                    question.add(rs.getString("question"+i+""));
-                    i=i++;
-                } 
+                System.out.println("hopefully only one"+ rs.getString("question1"));
+                question.add(rs.getString("question1"));
+                question.add(rs.getString("question2"));
+                question.add(rs.getString("question3"));
+                question.add(rs.getString("question4"));
             }
             s.close(); // close the Statement to let the database know we're done with it
             conn.close();
@@ -588,7 +583,7 @@ public class DBCommunicator {
         }
         catch(Exception e)
         {
-            System.out.println(e);
+            System.out.println("Get image questions:\n"+e);
         }
         
         return question;
