@@ -56,7 +56,7 @@ public class TestDBCommunicator {
         Assert.assertTrue(dbc.deleteUser("rynom"));
     }
     
-    @Test (enabled = false)
+    @Test (enabled = true)
     public void GamePool()
     {   Assert.assertTrue(dbc.addUser("rynom", "rmayer@outlook.com", "mayer123"));
         
@@ -65,13 +65,11 @@ public class TestDBCommunicator {
         Assert.assertTrue(dbc.checkUserInPool("ryno"));
         Assert.assertFalse(dbc.checkUserInPool("batman"));
         Assert.assertTrue(dbc.addUserToPool("rynom"));
-        Assert.assertTrue(dbc.userAvailable("ryno"));
-        
-        //Assert.assertTrue(dbc.connectToUser("foosh", "rynom"));
+        Assert.assertTrue(dbc.connectToUser("foosh", "rynom"));
         Assert.assertTrue(dbc.joinUserInPool("ryno", "rynom"));
        
         Assert.assertEquals(dbc.getNextMatchID(),2);
-       
+        Assert.assertTrue(dbc.userAvailable("rynom"));
         //delete match
         Assert.assertTrue(dbc.deleteUser("rynom"));
         //Assert.assertTrue(dbc.deleteGame("rynom"));
@@ -89,7 +87,7 @@ public class TestDBCommunicator {
         Assert.assertEquals(dbc.getCurrentQuestionForUser("1","foosh"),1);
         Assert.assertTrue(dbc.checkUserInPool("rynom"));
         
-       Assert.assertEquals(dbc.createMatch("1", "foosh", "ryno", 1, 0), 1);
+       Assert.assertEquals(dbc.createMatch(1, "foosh", "ryno", 1, 0), 1);
 
         
         Assert.assertTrue(dbc.deleteMatch(1));

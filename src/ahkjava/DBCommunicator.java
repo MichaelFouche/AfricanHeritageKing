@@ -487,7 +487,7 @@ public class DBCommunicator {
         return connected;
     }
     
-    public int createMatch(String matchID, String userID, String opponentUserID, int currentQuestion, float currentMatchScore)
+    public int createMatch(int matchID, String userID, String opponentUserID, int currentQuestion, float currentMatchScore)
     {
         int sessionID = 0;
         
@@ -513,7 +513,7 @@ public class DBCommunicator {
          }
          catch(Exception e)
          {
-             System.out.println(e);
+             System.out.println("Error in CreateMatch: \n"+e);
              
          }
         
@@ -530,25 +530,26 @@ public class DBCommunicator {
             
             Statement s = conn.createStatement();
             
-            s.execute("Select matchID from matchSession;"); //check data inserted
+            s.execute("Select MAX(matchID) from matchsession;"); //check data inserted
             
             ResultSet rs = s.getResultSet(); // get any ResultSet that came from our query
-            if (rs.last() ) // if rs == null, then there is no ResultSet to view  
+            if (rs.next() ) // if rs == null, then there is no ResultSet to view  
             {
+                System.out.println("MatchID: "+rs.getInt("matchID"));
                prevMatchID = rs.getInt("matchID");
                System.out.println("prev matchID " + prevMatchID);
             }
+            
             s.close(); // close the Statement to let the database know we're done with it
             conn.close();
             conn = null;
          }
          catch(Exception e)
          {
-             System.out.println(e);
+             System.out.println("Error in getNextMatchID: \n"+e);
              
          }
-        prevMatchID++;
-        //return prevMatchID++;
+        prevMatchID = prevMatchID+1;
         return prevMatchID;
     }
     
