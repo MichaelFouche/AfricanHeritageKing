@@ -14,6 +14,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
@@ -91,8 +94,11 @@ public class AHKJava implements ActionListener{
     boolean flagInGame;
     
     ArrayList<ArrayList<String>> poolList;
+    ArrayList<String> allImagesForGame;
+    ArrayList<String> questionForGameImage;
     String btnJoinPoolText ;
     String opponentUsername;
+    int currentImageViewing;
     
     
     public AHKJava() throws SQLException
@@ -103,6 +109,9 @@ public class AHKJava implements ActionListener{
         flagInGame = false;
         btnJoinPoolText = "Join Pool";
         opponentUsername = "";
+        currentImageViewing = 0;
+        allImagesForGame = new ArrayList<>();
+        
         
         ses.scheduleAtFixedRate(new Runnable() 
         {
@@ -549,6 +558,64 @@ public class AHKJava implements ActionListener{
         jfR.setResizable(false);
      }
      
+     public void getAllImages() throws IOException
+     {
+         try
+         {
+            allImagesForGame.clear();
+            String path = "./src/ahkjava/resources/images"; 
+
+            String fileItem;
+            File folder = new File(path);
+            File[] listOfFiles = folder.listFiles(); 
+
+            for (int i = 0; i < listOfFiles.length; i++) 
+            {
+
+                if (listOfFiles[i].isFile()) 
+                {
+                    fileItem = listOfFiles[i].getName();
+                    if (fileItem.endsWith(".jpg") || fileItem.endsWith(".JPG"))
+                    {
+                        allImagesForGame.add(fileItem);
+                        System.out.println(fileItem);
+                    }
+                }
+            }
+         }
+         catch(Exception e)
+         {
+             System.out.println("Get all images"+e);
+         }
+                 
+        
+        
+     }
+     public void getNextQuestion()
+     {
+         System.out.println("size: "+allImagesForGame.size());
+         String imageID = allImagesForGame.get(currentImageViewing);
+         questionForGameImage = dbc.requestQuestionForImage(imageID);
+         try
+         {              
+            BufferedImage bi = ImageIO.read(getClass().getResource("ahkLogo.JPG"));
+            ImageIcon image = new ImageIcon(bi); 
+            lblGamePic.setIcon(image);
+            //panelGameW.add(lblGamePic );
+         }
+         catch(Exception e)
+         {
+             System.out.println("createAHKGui(load image): \n"+e);
+         }
+         
+         //update label with image
+         
+         //update all the questions
+         //set the question number
+         //set the amount of correct answers
+         
+         //if at end of questions, set the currentImageViewing to zero
+     }
      
      public void actionPerformed(ActionEvent e)
     {
@@ -727,6 +794,7 @@ public class AHKJava implements ActionListener{
         if(e.getSource()==btnSubmitAnswer)
         {
             System.out.println("Check question and get next");
+            getNextQuestion();
         }
     }
  
@@ -771,10 +839,12 @@ public class AHKJava implements ActionListener{
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) {
-        System.out.println("hello updater");
+    public static void main(String[] args) throws IOException {
+        
+        //System.out.println("hello updater");
         try {
              AHKJava c = new AHKJava();
+             c.getAllImages();
              c.getRecords();
              //c.AmortizationLayout();
              c.createAHKGui();
@@ -788,8 +858,9 @@ public class AHKJava implements ActionListener{
          }  
        
         DBCommunicator dbc = new DBCommunicator();
-        System.out.println("User exists: "+dbc.usernameExists("foosh"));
-        System.out.println("User exists: "+dbc.usernameExists("ryno"));
+        
+        //System.out.println("User exists: "+dbc.usernameExists("foosh"));
+        //System.out.println("User exists: "+dbc.usernameExists("ryno"));
         
 
         

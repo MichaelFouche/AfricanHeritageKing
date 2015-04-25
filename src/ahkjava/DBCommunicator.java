@@ -579,6 +579,7 @@ public class DBCommunicator {
                 while(i <= 4 )
                 {
                     question.add(rs.getString("question"+i+""));
+                    i=i++;
                 } 
             }
             s.close(); // close the Statement to let the database know we're done with it
