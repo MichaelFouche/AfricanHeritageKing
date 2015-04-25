@@ -366,8 +366,7 @@ public class AHKJava implements ActionListener{
          panelPoolS = new JPanel();
          
          poolList = dbc.getPoolList();  
-         poolSize = poolList.size();
-         poolList = dbc.getPoolList();    
+         poolSize = poolList.size(); 
          lblUser = new JLabel[poolSize];
          lblScore = new JLabel[poolSize];
          btnJoin = new JButton[poolSize];
@@ -377,6 +376,7 @@ public class AHKJava implements ActionListener{
          {
              ArrayList<String> currentList = poolList.get(i);
              lblUser[i] = new JLabel(currentList.get(0));
+            // System.out.println("");
              lblScore[i] = new JLabel(currentList.get(1));
              btnJoin[i] = new JButton("Join");
              btnJoin[i].addActionListener(this);
@@ -557,6 +557,10 @@ public class AHKJava implements ActionListener{
                             btnSignIn.setText("Sign Out");
                             gameTimeEnable(false);
                             gamePoolEnable(true);
+                        }
+                        else
+                        {
+                            JOptionPane.showMessageDialog(null, "Sorry, the password entered is incorrect!","AHK - Login Request",JOptionPane.ERROR_MESSAGE);
                         }
                     }
                     else

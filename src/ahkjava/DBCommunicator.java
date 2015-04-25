@@ -285,15 +285,30 @@ public class DBCommunicator {
             ResultSetMetaData meta = rs.getMetaData();
             while (rs.next() ) // if rs == null, then there is no ResultSet to view  
             {
-                int i = 1;
-                int numCols = meta.getColumnCount();
-                if(i <= numCols )
-                {
-                    usersPool.add(rs.getString("userID"));
-                    usersPool.add(rs.getString("score"));
-                } 
+                usersPool = new ArrayList<>();
+                usersPool.add( rs.getString("userID"));
+                usersPool.add(rs.getString("score"));              
+                
                 poolList.add(usersPool);
             }
+            //int poolSize = poolList.size(); 
+           /* for(int i=0;i<poolSize;i++)
+            {
+                ArrayList<String> currentList = poolList.get(i);
+                System.out.println("uname "+currentList.get(0));
+                System.out.println("score"+currentList.get(1));
+                
+            }
+           for (int i = 0; i < poolList.size(); i++) 
+           {
+                for (ArrayList<String> innerList : poolList) {
+                    //You don't need this if all lists are the same length.
+                    System.out.println("uname"+innerList.get(0));
+                    System.out.println("score"+innerList.get(1));
+                }
+                System.out.println(); //new line for the next row
+            }*/
+           
             s.close(); // close the Statement to let the database know we're done with it
             conn.close();
             conn = null;
@@ -318,7 +333,7 @@ public class DBCommunicator {
             Statement insert = conn.createStatement();
             Statement s = conn.createStatement();
             
-            insert.execute("INSERT INTO gamePool (userID, opponentUserID) Values( '"+uname+"', '' ;"); // insert the data to the table
+            insert.execute("INSERT INTO gamePool (userID, opponentUserID) Values( '"+uname+"', '' );"); // insert the data to the table
             s.execute("Select userID from gamePool where userID  = '"+uname+"';"); //check data inserted
             
             ResultSet rs = s.getResultSet(); // get any ResultSet that came from our query
