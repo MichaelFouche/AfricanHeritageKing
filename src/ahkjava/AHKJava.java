@@ -753,6 +753,16 @@ public class AHKJava implements ActionListener{
                         progressSize = 60;
                         gameTimeLeft = true;
                         flagInGame = true;
+                        try
+                        {
+                            int sessionID = dbc.createMatch(dbc.getNextMatchID(), loggedInUsername, userToJoin, 0, 0);
+                            System.out.println("Session: "+sessionID);
+                        }
+                        catch(Exception ee)
+                        {
+                            System.out.println("Could not create the game session: \n"+ee);
+                        }
+                        
                     }
                     else
                     {
