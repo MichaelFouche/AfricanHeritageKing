@@ -88,6 +88,7 @@ public class AHKJava implements ActionListener{
     ScheduledExecutorService ses5 = Executors.newScheduledThreadPool(10);
     public int progressSize;
     boolean gameTimeLeft;
+    boolean flagInGame;
     
     ArrayList<ArrayList<String>> poolList;
     
@@ -96,8 +97,8 @@ public class AHKJava implements ActionListener{
     {
         makeConnection();
         loggedInUsername = "";
-        poolSize = 0;
-        
+        poolSize = 0;        
+        flagInGame = false;
         
         ses.scheduleAtFixedRate(new Runnable() 
         {
@@ -116,6 +117,7 @@ public class AHKJava implements ActionListener{
                     if(progressSize<1)
                     {
                         gameTimeLeft = false;
+                        flagInGame = false;
                     }    
                 }
                 
@@ -130,13 +132,30 @@ public class AHKJava implements ActionListener{
             {
                 //System.out.println("execute the timer query");
                 //Update Pool
-                //check if user in pool, then whether the user was matched yet to another user.                
-                poolList = dbc.getPoolList();
-                poolSize = poolList.size();
+                //check if user in pool, then whether the user was matched yet to another user.           
+                panelPool.removeAll();
                 addGamePoolToGUI();
                 panelPool.revalidate();
                 panelPool.repaint();
-                System.out.println("refresh");
+                panelPool.updateUI();
+                //System.out.println("refresh");
+                //System.out.println("loggedInUsername: "+loggedInUsername + "\tflagInGame: "+flagInGame);
+                if(loggedInUsername.equals("")&&!flagInGame)
+                {
+                    gameTimeEnable(false);
+                    gamePoolEnable(false);
+                }
+                else if(flagInGame)
+                {
+                    gameTimeEnable(true);
+                    gamePoolEnable(false);
+                }
+                else if(!loggedInUsername.equals("")&&!flagInGame)
+                {
+                    gameTimeEnable(false);
+                    gamePoolEnable(true);
+                }
+                    
                 
             }
         }, 5, 5, TimeUnit.SECONDS);  // execute every x seconds
@@ -239,6 +258,7 @@ public class AHKJava implements ActionListener{
          panelHeading.add(panelLogin,BorderLayout.EAST);
          
          //PANEL POOL
+         panelPool = new JPanel(new BorderLayout(2,2));
          this.addGamePoolToGUI();
          //GAME PANEL
          
@@ -340,7 +360,7 @@ public class AHKJava implements ActionListener{
      {
          //--PANEL POOL   
          
-         panelPool = new JPanel(new BorderLayout(2,2));
+         
          panelPool.setBorder(new TitledBorder("Game Pool"));
          panelPoolN = new JPanel();
          panelPoolS = new JPanel();
@@ -405,6 +425,7 @@ public class AHKJava implements ActionListener{
          panelPool.add(panelPoolN,BorderLayout.NORTH);
          panelPool.add(panelPoolS, BorderLayout.SOUTH);
          //END OF PANEL POOL
+         
      }
      public void gamePoolEnable(boolean flag)
      {
@@ -608,6 +629,7 @@ public class AHKJava implements ActionListener{
                     gamePoolEnable(false);
                     progressSize = 60;
                     gameTimeLeft = true;
+                    flagInGame = true;
                 }
             }
         }
@@ -615,7 +637,11 @@ public class AHKJava implements ActionListener{
         {
             if(btnAddUserToPool.getText().equals("Join Pool"))
             {
-                if(dbc.addUserToPool(loggedInUsername))
+                if(dbc.checkUserInPool(loggedInUsername))
+                {
+                    JOptionPane.showMessageDialog(null, "You are already in the pool","AHK - Pool",JOptionPane.ERROR_MESSAGE);
+                }
+                else if(dbc.addUserToPool(loggedInUsername))
                 {
                     System.out.println("User added to pool");
                     btnAddUserToPool.setText("Leave Pool");
