@@ -335,7 +335,7 @@ public class DBCommunicator {
             Statement insert = conn.createStatement();
             Statement s = conn.createStatement();
             
-            insert.execute("INSERT INTO gamePool (userID, opponentUserID) Values( '"+uname+"', NULL );"); // insert the data to the table
+            insert.execute("INSERT INTO gamePool (userID, opponentUserID) Values( '"+uname+"', '' );"); // insert the data to the table
             s.execute("Select userID from gamePool where userID  = '"+uname+"';"); //check data inserted
             
             ResultSet rs = s.getResultSet(); // get any ResultSet that came from our query
@@ -411,7 +411,7 @@ public class DBCommunicator {
             
             Statement s = conn.createStatement();
             
-            s.execute("SELECT UserID FROM GamePool where UserID = '"+uname+"' and opponentUserID IS NULL;"); //check user in pool            
+            s.execute("SELECT UserID FROM GamePool where UserID = '"+uname+"' and opponentUserID = '';"); //check user in pool            
             ResultSet rs = s.getResultSet(); // get any ResultSet that came from our query
             while (rs.next() ) // if rs == null, then there is no ResultSet to view  
             {

@@ -56,7 +56,7 @@ public class TestDBCommunicator {
         Assert.assertTrue(dbc.deleteUser("rynom"));
     }
     
-    @Test (enabled = true)
+    @Test (enabled = false)
     public void GamePool()
     {   Assert.assertTrue(dbc.addUser("rynom", "rmayer@outlook.com", "mayer123"));
         
