@@ -46,6 +46,7 @@ import javax.swing.border.TitledBorder;
 /**
  *
  * @author mifouche
+ * Update 25 April 8:17PM
  */
 
 public class AHKJava implements ActionListener{
