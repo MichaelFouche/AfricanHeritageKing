@@ -512,7 +512,7 @@ public class DBCommunicator {
          }
          catch(Exception e)
          {
-             System.out.println(e);
+             System.out.println("Error in CreateMatch: \n"+e);
              
          }
         
