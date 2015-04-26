@@ -12,6 +12,8 @@ import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -86,7 +88,7 @@ public class AHKJava implements ActionListener{
     String imageID;
     
     JButton btnSubmitAnswer;
-    //variables
+    //game variables
     
     String loggedInUsername;
     ScheduledExecutorService ses = Executors.newScheduledThreadPool(10);
@@ -94,6 +96,7 @@ public class AHKJava implements ActionListener{
     public int progressSize;
     boolean gameTimeLeft;
     boolean flagInGame;
+    String userToJoin;
     
     ArrayList<ArrayList<String>> poolList;
     ArrayList<String> allImagesForGame;
@@ -104,6 +107,17 @@ public class AHKJava implements ActionListener{
     int sessionID;
     boolean waitingInPool;
     boolean justFinishedGame;
+    int matchID;
+    
+    //Scoreboard
+    JFrame jfW;
+    JPanel panelWN, panelWC, panelWS;
+    JLabel lblWLogo, lblWplayer;
+    JProgressBar pbWPlayer1, pbWPlayer2;
+    JButton btnWReturn;
+    Boolean scoreboardOpen;
+    Boolean imTheJoiningUser;
+    //Scoreboard
     
     
     public AHKJava() throws SQLException
@@ -117,6 +131,9 @@ public class AHKJava implements ActionListener{
         allImagesForGame = new ArrayList<>();
         waitingInPool = false;
         justFinishedGame = false;
+        scoreboardOpen = false;
+        imTheJoiningUser = false;
+        gameTimeLeft = false;
         
         
         ses.scheduleAtFixedRate(new Runnable() 
@@ -138,16 +155,19 @@ public class AHKJava implements ActionListener{
                         gameTimeLeft = false;
                         flagInGame = false;
                         justFinishedGame = true;
+                        scoreboardOpen = true;
+                        createWinningGui();
                     } 
                 }
                 else if(justFinishedGame)
                 {
                     justFinishedGame = false;
-                    JOptionPane.showMessageDialog(null, "Your time is up!\nYou answered "+dbc.getCurrentQuestionForUser(sessionID, loggedInUsername)+" questions, with "+dbc.getScoreForUser(sessionID, loggedInUsername)+" correct","AHK - Game",JOptionPane.ERROR_MESSAGE);
-
+                   // JOptionPane.showMessageDialog(null, "Your time is up!\nYou answered "+dbc.getCurrentQuestionForUser(sessionID, loggedInUsername)+" questions, with "+dbc.getScoreForUser(sessionID, loggedInUsername)+" correct","AHK - Game",JOptionPane.ERROR_MESSAGE);
+                    
                     //call the who won window
                     //that window should display the results of both players
                 }
+                
                 
                 
             }
@@ -177,7 +197,7 @@ public class AHKJava implements ActionListener{
                         gameTimeLeft = true;
                         flagInGame = true;
                         waitingInPool = false;
-                        
+                        imTheJoiningUser = true;
                         //--------
                         
                         try
@@ -191,10 +211,40 @@ public class AHKJava implements ActionListener{
                         {
                             System.out.println("Could not create the game session: \n"+ee);
                         }
-                        System.out.println("username:"+loggedInUsername+"opponent: "+opponentUsername[0]+ "session: "+sessionID+" match: "+opponentUsername[1]);
+                        System.out.println("username:"+loggedInUsername+" opponent: "+opponentUsername[0]+ " session: "+sessionID+" match: "+opponentUsername[1]);
                         getNextQuestion();
                         //start game.
                     }       
+                }
+                if(scoreboardOpen)
+                {
+                    if(imTheJoiningUser)
+                    {
+                        //System.out.println("username:"+loggedInUsername+" opponent: "+opponentUsername[0]+ " session: "+sessionID+" match: "+opponentUsername[1]);
+                        System.out.println("Results for joiner: ");
+                        lblWplayer.setText(loggedInUsername+" VS "+opponentUsername[0]);
+                        int score1 = dbc.getResults(sessionID,loggedInUsername, opponentUsername[0]);
+                        int score2 = dbc.getOpponentScore(Integer.parseInt(opponentUsername[1]), opponentUsername[0]);
+                        pbWPlayer1.setValue(score1);
+                        pbWPlayer1.setString(loggedInUsername+" scored "+score1);
+                        pbWPlayer2.setValue(score2);
+                        pbWPlayer2.setString(opponentUsername[0]+" scored "+score2);
+                        
+                    }
+                    else
+                    {
+                        //System.out.println("username:"+loggedInUsername+"opponent: "+userToJoin+ "session: "+sessionID+" match: "+matchID);
+                        lblWplayer.setText(loggedInUsername+" VS "+userToJoin);
+                        int score1 = dbc.getResults(sessionID,loggedInUsername, userToJoin);
+                        int score2 = dbc.getOpponentScore(matchID, userToJoin);
+                        pbWPlayer1.setValue(score1);
+                        pbWPlayer1.setString(loggedInUsername+" scored "+score1);
+                        pbWPlayer2.setValue(score2);
+                        pbWPlayer2.setString(userToJoin+" scored "+score2);
+                        
+                    }
+                    //update who won here
+                    
                 }
                 
                 updatePoolPanel();
@@ -210,6 +260,7 @@ public class AHKJava implements ActionListener{
 
     private Connection conn;  
 
+        
      public  Connection makeConnection() throws SQLException {
         if (conn == null) {
              new Driver();
@@ -254,7 +305,67 @@ public class AHKJava implements ActionListener{
          }
          
      }
-     
+     public void createWinningGui()
+     {
+         
+                 
+         
+         jfW = new JFrame("AHK - Scoreboard");
+         panelWN = new JPanel();
+         panelWC = new JPanel(new GridLayout(3,1));
+         panelWS = new JPanel();
+         
+         try
+         {              
+            BufferedImage bi = ImageIO.read(getClass().getResource("ahkMiniLogo.JPG"));
+            ImageIcon image = new ImageIcon(bi); 
+            lblWLogo = new JLabel(image);
+            panelWN.add(lblWLogo );
+         }
+         catch(Exception e)
+         {
+             System.out.println("createWinningGui(load image): \n"+e);             
+         }
+         
+         lblWplayer = new JLabel("Player 1 vs Player 2");
+         pbWPlayer1 = new JProgressBar(0,100);
+         pbWPlayer1.setStringPainted(true);
+         pbWPlayer1.setValue(0);
+         pbWPlayer1.setString("Player 1 score loading");  
+         
+         pbWPlayer2 = new JProgressBar(0,100);
+         pbWPlayer2.setStringPainted(true);
+         pbWPlayer2.setValue(0);
+         pbWPlayer2.setString("Player 1 score loading");
+         
+         panelWC.add(lblWplayer);
+         panelWC.add(pbWPlayer1);
+         panelWC.add(pbWPlayer2);
+         
+         btnWReturn = new JButton("Return to main window");
+         btnWReturn.addActionListener(this);
+         panelWS.add(btnWReturn);
+         
+         jfW.add(panelWN,BorderLayout.NORTH);
+         jfW.add(panelWC,BorderLayout.CENTER);
+         jfW.add(panelWS,BorderLayout.SOUTH);
+         //jfW.setDefaultCloseOperation(jfW.DISPOSE_ON_CLOSE);
+         jfW.pack();
+         jfW.setResizable(false);
+         jfW.setVisible(true);
+         jfW.setLocationRelativeTo(jf);
+         jfW.addWindowListener(new java.awt.event.WindowAdapter() 
+         {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) 
+            {
+                {
+                    jfW.dispose();
+                    scoreboardOpen = false;
+                }
+            }
+        });
+     }
      
      public void createAHKGui()
      {
@@ -382,25 +493,25 @@ public class AHKJava implements ActionListener{
          jf.setSize(1350,700);
          jf.setLocationRelativeTo(null);
          jf.setDefaultCloseOperation(jf.EXIT_ON_CLOSE);
+         
          /*
-         jfQ.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE); //DISPOSE_ON_CLOSE,  DISPOSE_ON_CLOSE 
-        jfQ.addWindowListener(new WindowAdapter() 
+         jf.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE); //DISPOSE_ON_CLOSE,  DISPOSE_ON_CLOSE 
+        jf.addWindowListener(new WindowAdapter() 
         {
             @Override
             public void windowClosing(WindowEvent e) 
             {
-                int result = JOptionPane.showConfirmDialog(jfQ, "Are you sure you would like to exit?");
+                int result = JOptionPane.showConfirmDialog(jf, "Are you sure you would like to exit?");
                 if( result==JOptionPane.OK_OPTION)
                 {
                     // NOW we change it to dispose on close..
-                    jfQ.setDefaultCloseOperation(jfT.DISPOSE_ON_CLOSE);
-                    jfQ.setVisible(false);
-                    jfQ.dispose();
-                    guiSelectQuantityBool = false;
+                    jf.setDefaultCloseOperation(jf.EXIT_ON_CLOSE);
+                    jf.setVisible(false);
+                    jf.dispose();
                 }
             }
-        });
-         */
+        });*/
+         
          jf.setVisible(true);
      }
      public void addGamePoolToGUI()
@@ -780,7 +891,7 @@ public class AHKJava implements ActionListener{
             {
                 if(e.getSource()==btnJoin[a])
                 {
-                    String userToJoin = lblUser[a].getText();
+                    userToJoin = lblUser[a].getText();
                     if(dbc.userAvailable(userToJoin))
                     {  
                         getNextQuestion();
@@ -790,7 +901,7 @@ public class AHKJava implements ActionListener{
                         progressSize = 60;
                         gameTimeLeft = true;
                         flagInGame = true;
-                        int matchID = 0;
+                        matchID = 0;
                         try
                         {
                             matchID = dbc.getNextMatchID();
@@ -895,6 +1006,12 @@ public class AHKJava implements ActionListener{
             //match the rb text to the asnwer for the question
             //add the mark if correct
             getNextQuestion();
+        }
+        if(e.getSource()== btnWReturn)
+        {
+            jfW.dispose();
+            scoreboardOpen = false;
+            imTheJoiningUser = false;
         }
     }
  

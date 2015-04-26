@@ -432,6 +432,7 @@ public class DBCommunicator {
         
         return available;
     }
+   
     public String[] matchFoundInPool(String uname)
     {
         String[] opponentUsername = {"",""};
@@ -692,7 +693,7 @@ public class DBCommunicator {
              
          }
     }
-    public int getResults(String matchSessionID,String userID, String opponentUserID)
+    public int getResults(int matchSessionID,String userID, String opponentUserID)
     {
         int currentMatchScore = 0;
         
@@ -720,6 +721,34 @@ public class DBCommunicator {
         }
         
         return currentMatchScore;
+    }
+    public int getOpponentScore(int matchID, String userID)
+    {
+        int score = 0;
+        try
+        {
+            conn = makeConnection();
+            
+            Statement s = conn.createStatement();
+            
+            s.execute("Select currentMatchScore from matchSession where matchID = '"+matchID+"' and userID = '"+userID+"' ;"); //check data inserted
+            
+            ResultSet rs = s.getResultSet(); // get any ResultSet that came from our query
+            if (rs.next() ) // if rs == null, then there is no ResultSet to view  
+            {
+                score = rs.getInt("currentMatchScore");
+                
+            }
+            s.close(); // close the Statement to let the database know we're done with it
+            conn.close();
+            conn = null;
+        }
+        catch(Exception e)
+        {
+            System.out.println("ERROR in getOpponentScore: \n"+e);
+        }
+        
+        return score;
     }
     
     public int getScoreForUser(int matchSessionID, String userName)
