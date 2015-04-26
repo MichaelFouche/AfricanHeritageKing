@@ -99,9 +99,11 @@ public class AHKJava implements ActionListener{
     ArrayList<String> allImagesForGame;
     ArrayList<String> questionForGameImage;
     String btnJoinPoolText ;
-    String opponentUsername;
+    String[] opponentUsername = {"",""};
     int currentImageViewing;
     int sessionID;
+    boolean waitingInPool;
+    boolean justFinishedGame;
     
     
     public AHKJava() throws SQLException
@@ -111,9 +113,10 @@ public class AHKJava implements ActionListener{
         poolSize = 0;        
         flagInGame = false;
         btnJoinPoolText = "Join Pool";
-        opponentUsername = "";
         currentImageViewing = 0;
         allImagesForGame = new ArrayList<>();
+        waitingInPool = false;
+        justFinishedGame = false;
         
         
         ses.scheduleAtFixedRate(new Runnable() 
@@ -134,7 +137,16 @@ public class AHKJava implements ActionListener{
                     {
                         gameTimeLeft = false;
                         flagInGame = false;
-                    }    
+                        justFinishedGame = true;
+                    } 
+                }
+                else if(justFinishedGame)
+                {
+                    justFinishedGame = false;
+                    JOptionPane.showMessageDialog(null, "Your time is up!\nYou answered "+dbc.getCurrentQuestionForUser(sessionID, loggedInUsername)+" questions, with "+dbc.getScoreForUser(sessionID, loggedInUsername)+" correct","AHK - Game",JOptionPane.ERROR_MESSAGE);
+
+                    //call the who won window
+                    //that window should display the results of both players
                 }
                 
                 
@@ -149,17 +161,42 @@ public class AHKJava implements ActionListener{
                 //System.out.println("execute the timer query");
                 //Update Pool
                 //check if user in pool, then whether the user was matched yet to another user. 
-                opponentUsername = dbc.matchFoundInPool(loggedInUsername);
-                if(!opponentUsername.equals(""))
+                if(waitingInPool)
                 {
-                    dbc.removeUserFromPool(loggedInUsername);
-                    gameTimeEnable(true);
-                    gamePoolEnable(false);
-                    progressSize = 60;
-                    gameTimeLeft = true;
-                    flagInGame = true;
-                    //start game.
+                    //System.out.println("Waiting in pool");
+                    opponentUsername = dbc.matchFoundInPool(loggedInUsername);
+                    //System.out.println("Opponent try: "+opponentUsername);
+                    //opponentUsername[1] is the matchID  <-- IMPORTANT
+                    if(!opponentUsername[0].equals(""))
+                    {
+                        //System.out.println("Partner found");
+                        dbc.removeUserFromPool(loggedInUsername);
+                        gameTimeEnable(true);
+                        gamePoolEnable(false);
+                        progressSize = 60;
+                        gameTimeLeft = true;
+                        flagInGame = true;
+                        waitingInPool = false;
+                        
+                        //--------
+                        
+                        try
+                        {
+                            //opponentUsername[1] is the matchID  <-- IMPORTANT
+                            sessionID = dbc.createMatch(Integer.parseInt(opponentUsername[1]), loggedInUsername, opponentUsername[0], 1, 0);
+                            //dbc.createMatch(matchID, loggedInUsername, userToJoin, 1, 0);
+                            //System.out.println("Session: "+sessionID);
+                        }
+                        catch(Exception ee)
+                        {
+                            System.out.println("Could not create the game session: \n"+ee);
+                        }
+                        System.out.println("username:"+loggedInUsername+"opponent: "+opponentUsername[0]+ "session: "+sessionID+" match: "+opponentUsername[1]);
+                        getNextQuestion();
+                        //start game.
+                    }       
                 }
+                
                 updatePoolPanel();
                     
                 
@@ -342,7 +379,8 @@ public class AHKJava implements ActionListener{
          jf.add(panelPool, BorderLayout.WEST);
          jf.add(panelGame, BorderLayout.EAST);
          jf.add(panelSouth, BorderLayout.SOUTH);
-         jf.setSize(1300,700);
+         jf.setSize(1350,700);
+         jf.setLocationRelativeTo(null);
          jf.setDefaultCloseOperation(jf.EXIT_ON_CLOSE);
          /*
          jfQ.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE); //DISPOSE_ON_CLOSE,  DISPOSE_ON_CLOSE 
@@ -385,7 +423,6 @@ public class AHKJava implements ActionListener{
          {
              ArrayList<String> currentList = poolList.get(i);
              lblUser[i] = new JLabel(currentList.get(0));
-            // System.out.println("");
 
              lblScore[i] = new JLabel(currentList.get(1));
              btnJoin[i] = new JButton("Join");
@@ -448,8 +485,6 @@ public class AHKJava implements ActionListener{
         panelPool.revalidate();
         panelPool.repaint();
         panelPool.updateUI();
-        //System.out.println("refresh");
-        //System.out.println("loggedInUsername: "+loggedInUsername + "\tflagInGame: "+flagInGame);
         if(loggedInUsername.equals("")&&!flagInGame)
         {
             gameTimeEnable(false);
@@ -584,7 +619,6 @@ public class AHKJava implements ActionListener{
                     if (fileItem.endsWith(".jpg") || fileItem.endsWith(".JPG"))
                     {
                         allImagesForGame.add(fileItem);
-                        System.out.println(fileItem);
                     }
                 }
             }
@@ -599,10 +633,9 @@ public class AHKJava implements ActionListener{
      }
      public void getNextQuestion()
      {
-         System.out.println("size: "+allImagesForGame.size());
          imageID = allImagesForGame.get(currentImageViewing);
         
-         System.out.println("Imageid: "+imageID.substring(0, imageID.length() - 4));
+         //System.out.println("Imageid: "+imageID.substring(0, imageID.length() - 4));
          questionForGameImage = dbc.requestQuestionForImage(imageID.substring(0, imageID.length() - 4));
          try
          {              
@@ -632,9 +665,8 @@ public class AHKJava implements ActionListener{
              currentImageViewing=0;
          }
          
-         System.out.println("currentImageViewing: "+currentImageViewing);
+         //System.out.println("currentImageViewing: "+currentImageViewing);
          //need to update that entire center panel to allow the length of each place to not f**k everything up
-         
          //set the question number
          //set the amount of correct answers
          
@@ -746,29 +778,31 @@ public class AHKJava implements ActionListener{
             
             for(int a =0;a<poolSize;a++)
             {
-                System.out.println("poolSize: "+poolSize);
                 if(e.getSource()==btnJoin[a])
                 {
                     String userToJoin = lblUser[a].getText();
                     if(dbc.userAvailable(userToJoin))
                     {  
                         getNextQuestion();
-                        dbc.joinUserInPool(loggedInUsername,userToJoin);
+                        
                         gameTimeEnable(true);
                         gamePoolEnable(false);
                         progressSize = 60;
                         gameTimeLeft = true;
                         flagInGame = true;
+                        int matchID = 0;
                         try
                         {
-                            sessionID = dbc.createMatch(dbc.getNextMatchID(), loggedInUsername, userToJoin, 0, 0);
-                            System.out.println("Session: "+sessionID);
+                            matchID = dbc.getNextMatchID();
+                            dbc.joinUserInPool(loggedInUsername,userToJoin,matchID);
+                            sessionID = dbc.createMatch(matchID, loggedInUsername, userToJoin, 1, 0);
+                            //System.out.println("Session: "+sessionID);
                         }
                         catch(Exception ee)
                         {
                             System.out.println("Could not create the game session: \n"+ee);
                         }
-                        
+                        System.out.println("username:"+loggedInUsername+"opponent: "+userToJoin+ "session: "+sessionID+" match: "+matchID);
                     }
                     else
                     {
@@ -777,6 +811,7 @@ public class AHKJava implements ActionListener{
                     
                 }
             }
+            
         }
         if(e.getSource()==btnAddUserToPool)
         {
@@ -793,6 +828,7 @@ public class AHKJava implements ActionListener{
                     btnJoinPoolText = "Leave Pool";
                     btnAddUserToPool.setText(btnJoinPoolText);
                     updatePoolPanel();
+                    waitingInPool = true;
                 }
             }
             else
@@ -805,6 +841,7 @@ public class AHKJava implements ActionListener{
                         btnJoinPoolText = "Join Pool";
                         btnAddUserToPool.setText(btnJoinPoolText);
                         updatePoolPanel();
+                        waitingInPool = false;
                     }
                     else
                     {
@@ -849,12 +886,11 @@ public class AHKJava implements ActionListener{
                 JOptionPane.showMessageDialog(null, "Oops, you didn't select an answer","AHK - Pool",JOptionPane.ERROR_MESSAGE);
             }
             
-            System.out.println("Check question and get next");
-            System.out.println("Selected radiobutton: "+answerText);
             boolean answerCorrect = dbc.submitAnswer(imageID.substring(0, imageID.length() - 4),answerText);
-            System.out.println("previous answer result: "+answerCorrect);
             dbc.updateAnswer(sessionID, loggedInUsername,answerCorrect);
-            System.out.println("Current Question = "+dbc.getCurrentQuestionForUser(sessionID, loggedInUsername));
+            
+            lblQuest2.setText(dbc.getCurrentQuestionForUser(sessionID, loggedInUsername)+"");
+            lblCorrect2.setText(dbc.getScoreForUser(sessionID, loggedInUsername)+"");
             //get the radio button selected
             //match the rb text to the asnwer for the question
             //add the mark if correct

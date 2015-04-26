@@ -69,7 +69,7 @@ public class DBCommunicator {
          }
          catch(Exception e)
          {
-             System.out.println(e);
+             System.out.println("ERROR in usernameExists: \n"+e);
              
          }
          return flag;
@@ -96,7 +96,7 @@ public class DBCommunicator {
          }
          catch(Exception e)
          {
-             System.out.println(e);
+             System.out.println("ERROR in usernameMatchPassword: \n"+e);
              
          }
          return flag;
@@ -163,7 +163,7 @@ public class DBCommunicator {
         }
         catch(Exception e)
         {
-            System.out.println(e);
+            System.out.println("ERROR in registerUser: \n"+e);
         }
         
         return errors;
@@ -189,7 +189,7 @@ public class DBCommunicator {
         }
         catch(Exception e)
         {    
-            System.out.println(e);
+            System.out.println("ERROR in emailExists: \n"+e);
         }
         return exists;
     }
@@ -252,7 +252,7 @@ public class DBCommunicator {
          }
          catch(Exception e)
          {
-             System.out.println(e);
+             System.out.println("ERROR in addUser: \n"+e);
              
          }
         
@@ -316,7 +316,7 @@ public class DBCommunicator {
         }
         catch(Exception e)
         {
-            System.out.println(e);
+            System.out.println("ERROR in getPoolList: \n"+e);
         }
         return poolList;
     }
@@ -326,7 +326,6 @@ public class DBCommunicator {
         boolean added = false;
         if(!checkUserInPool(uname))
         {
-            System.out.println("user not in pool");
             //add to pool
             try
             {
@@ -350,7 +349,7 @@ public class DBCommunicator {
             }
             catch(Exception e)
             {
-                System.out.println(e);
+                System.out.println("ERROR in addUserToPool: \n"+e);
             }
            
         }
@@ -380,24 +379,29 @@ public class DBCommunicator {
         }
         catch(Exception e)
         {
-            System.out.println(e);
+            System.out.println("ERROR in checkUserInPool: \n"+e);
         }
         
         return inPool;
     }
     
-    public boolean joinUserInPool(String uname, String oppoName)
+    public boolean joinUserInPool(String uname, String oppoName, int matchID)
     {
         boolean joinedPool = false;
         
         if(userAvailable(oppoName))
         {
-            joinedPool = connectToUser(uname, oppoName);
+            joinedPool = connectToUser(uname, oppoName,matchID);
             if(joinedPool)
-                System.out.println("User Joined in Pool");
+            {
+                System.out.println(uname+" Joined "+oppoName+" in Pool");
+            }
+                
         }
         else
+        {
             System.out.println("Joining user in pool not available anymore");
+        }
         return joinedPool;
     }
     
@@ -423,14 +427,14 @@ public class DBCommunicator {
         }
         catch(Exception e)
         {
-            System.out.println(e);
+            System.out.println("ERROR in userAvailable: \n"+e);
         }
         
         return available;
     }
-    public String matchFoundInPool(String uname)
+    public String[] matchFoundInPool(String uname)
     {
-        String opponentUsername = "";
+        String[] opponentUsername = {"",""};
         
         try
         {
@@ -438,11 +442,12 @@ public class DBCommunicator {
             
             Statement s = conn.createStatement();
             
-            s.execute("SELECT opponentUserID FROM GamePool where UserID = '"+uname+"' and opponentUserID not like '';"); //check user in pool            
+            s.execute("SELECT opponentUserID, matchID FROM GamePool where UserID = '"+uname+"' and opponentUserID not like '';"); //check user in pool            
             ResultSet rs = s.getResultSet(); // get any ResultSet that came from our query
             while (rs.next() ) // if rs == null, then there is no ResultSet to view  
             {
-               opponentUsername = rs.getString("opponentUserID");
+               opponentUsername[0] = rs.getString("opponentUserID");
+               opponentUsername[1] = rs.getInt("matchID")+"";
             }
             s.close(); // close the Statement to let the database know we're done with it
             conn.close();
@@ -450,13 +455,13 @@ public class DBCommunicator {
         }
         catch(Exception e)
         {
-            System.out.println(e);
+            System.out.println("ERROR in matchFoundInPool: \n"+e);
         }
         
         return opponentUsername;
     }
     
-    public boolean connectToUser(String uname, String oppoName)
+    public boolean connectToUser(String uname, String oppoName, int matchID)
     {
         boolean connected = false;
         
@@ -466,10 +471,11 @@ public class DBCommunicator {
             
             Statement s = conn.createStatement();
             
-            String query = ("UPDATE GamePool SET opponentUserID = ? where UserID = ? ");    
+            String query = ("UPDATE GamePool SET opponentUserID = ?, matchID = ? where UserID = ? ");    
             PreparedStatement preparedStmt = conn.prepareStatement(query);
-            preparedStmt.setString(1, uname);
-            preparedStmt.setString(2, oppoName);
+            preparedStmt.setString(1, uname);            
+            preparedStmt.setInt(2, matchID);            
+            preparedStmt.setString(3, oppoName);
  
       // execute the java preparedstatement
             preparedStmt.executeUpdate();
@@ -477,11 +483,11 @@ public class DBCommunicator {
             conn.close();
             conn = null;
             connected = true;
-            System.out.println("GamePool joining opponent:"+oppoName+"\tUser: "+uname);
+            System.out.println("----------------\nGamePool, user("+uname+") joining opponent: "+oppoName+"\t ");
         }
         catch(Exception e)
         {
-            System.out.println("Update matchsession to add userID in the opponent slot "+e);
+            System.out.println("ERROR in connectToUser \n"+e);
         }
         
         return connected;
@@ -499,7 +505,7 @@ public class DBCommunicator {
             Statement s = conn.createStatement();
             
             insert.execute("INSERT INTO matchSession (matchID, userID, opponentUserID, currentQuestion, currentMatchScore) Values( '"+matchID+"','"+userID+"' ,'"+opponentUserID+"','"+currentQuestion+"' ,'"+currentMatchScore+"');"); // insert the data to the table
-            s.execute("Select matchSessionID from matchSession where matchID  = '"+matchID+"';"); //check data inserted
+            s.execute("Select matchSessionID from matchSession where matchID  = '"+matchID+"' and userID = '"+userID+"';"); //check data inserted
             
             ResultSet rs = s.getResultSet(); // get any ResultSet that came from our query
             if (rs.next() ) // if rs == null, then there is no ResultSet to view  
@@ -535,9 +541,9 @@ public class DBCommunicator {
             ResultSet rs = s.getResultSet(); // get any ResultSet that came from our query
             if (rs.next() ) // if rs == null, then there is no ResultSet to view  
             {
-               System.out.println("MatchID: "+rs.getInt("matchID"));
+               //System.out.println("MatchID: "+rs.getInt("matchID"));
                prevMatchID = rs.getInt("matchID");
-               System.out.println("prev matchID " + prevMatchID);
+               //System.out.println("prev matchID " + prevMatchID);
             }
             
             s.close(); // close the Statement to let the database know we're done with it
@@ -575,7 +581,6 @@ public class DBCommunicator {
             ResultSet rs = s.getResultSet(); // get any ResultSet that came from our query
             while (rs.next() ) // if rs == null, then there is no ResultSet to view  
             {
-                System.out.println("hopefully only one "+ rs.getString("question1"));
                 question.add(rs.getString("question1"));
                 question.add(rs.getString("question2"));
                 question.add(rs.getString("question3"));
@@ -587,7 +592,7 @@ public class DBCommunicator {
         }
         catch(Exception e)
         {
-            System.out.println("Get image questions:\n"+e);
+            System.out.println("ERROR in requestQuestionForImage:\n"+e);
         }
         
         return question;
@@ -620,32 +625,58 @@ public class DBCommunicator {
         }
         catch(Exception e)
         {
-            System.out.println(e);
+            System.out.println("ERROR in submitAnswer:\n"+e);
         }
         
         return correct;
         
     }
-    public void updateAnswer(int matchID,String userID,   Boolean correct)
+    public void updateAnswer(int matchSessionID,String userID,   Boolean correct)
     {
+        int currentQuestion = 0;
+        int currentMatchScore = 0;
         try
          {
             conn = makeConnection();
             
+            String query = "SELECT currentQuestion,currentMatchScore FROM matchsession where matchSessionID = "+matchSessionID+" and userID = '"+userID+"' " ;
+            // create the java statement
+            Statement st = conn.createStatement();
+
+            // execute the query, and get a java resultset
+            ResultSet rs = st.executeQuery(query);
+
+            // iterate through the java resultset
+            while (rs.next())
+            {
+                currentQuestion = rs.getInt("currentQuestion");
+                currentMatchScore = rs.getInt("currentMatchScore");  
+            }
+            rs.close();
+            st.close();
+            conn = makeConnection();
             Statement s = conn.createStatement();
-            String query ;
+            PreparedStatement preparedStmt ;
             if(correct)
             {
-                query = ("UPDATE matchsession currentQuestion = currentQuestion+1, currentMatchScore = currentMatchScore+1 where matchID = ? and userID = ? ;"); // insert the data to the table
+                currentQuestion = currentQuestion+1;
+                currentMatchScore = currentMatchScore+1;
+                query = ("UPDATE matchsession set currentQuestion = ?, currentMatchScore = ? where matchSessionID = ? and userID = ? ;"); // insert the data to the table
+                 preparedStmt = conn.prepareStatement(query);
+                preparedStmt.setInt(1, currentQuestion);
+                preparedStmt.setInt(2, currentMatchScore);
+                preparedStmt.setInt(3, matchSessionID);
+                preparedStmt.setString(4, userID);
             }
             else
             {
-                query = ("UPDATE matchsession currentQuestion = currentQuestion+1 where matchID = ? and userID = ? ;"); // insert the data to the table                
+                currentQuestion = currentQuestion+1;
+                query = ("UPDATE matchsession set currentQuestion = ? where matchSessionID = ? and userID = ? ;"); // insert the data to the table  
+                preparedStmt = conn.prepareStatement(query);
+                preparedStmt.setInt(1, currentQuestion);
+                preparedStmt.setInt(2, matchSessionID);
+                preparedStmt.setString(3, userID);
             }
-            PreparedStatement preparedStmt = conn.prepareStatement(query);
-            preparedStmt.setInt(1, matchID);
-            preparedStmt.setString(2, userID);
-            
  
       // execute the java preparedstatement
             preparedStmt.executeUpdate();
@@ -657,11 +688,11 @@ public class DBCommunicator {
          }
          catch(Exception e)
          {
-             System.out.println(e);
+             System.out.println("Error in updateAnswer: \t"+e);
              
          }
     }
-    public int getResults(String matchID,String userID, String opponentUserID)
+    public int getResults(String matchSessionID,String userID, String opponentUserID)
     {
         int currentMatchScore = 0;
         
@@ -671,7 +702,7 @@ public class DBCommunicator {
             
             Statement s = conn.createStatement();
             
-            s.execute("Select currentMatchScore from matchSession where matchID = '"+matchID+"' and userID = '"+userID+"' and opponentUserID = '"+opponentUserID+"' ;"); //check data inserted
+            s.execute("Select currentMatchScore from matchSession where matchSessionID = '"+matchSessionID+"' and userID = '"+userID+"' and opponentUserID = '"+opponentUserID+"' ;"); //check data inserted
             
             ResultSet rs = s.getResultSet(); // get any ResultSet that came from our query
             if (rs.next() ) // if rs == null, then there is no ResultSet to view  
@@ -685,13 +716,13 @@ public class DBCommunicator {
         }
         catch(Exception e)
         {
-            System.out.println(e);
+            System.out.println("ERROR in getResults: \n"+e);
         }
         
         return currentMatchScore;
     }
     
-    public int getScoreForUser(String matchID, String userName)
+    public int getScoreForUser(int matchSessionID, String userName)
     {
         int score = 0;
         
@@ -701,12 +732,12 @@ public class DBCommunicator {
             
             Statement s = conn.createStatement();
             
-            s.execute("Select currentMatchScore from matchSession where matchID = '"+matchID+"' userID = '"+userName+"';"); //check data inserted
+            s.execute("Select currentMatchScore from matchSession where matchSessionID = '"+matchSessionID+"' and userID = '"+userName+"';"); //check data inserted
             
             ResultSet rs = s.getResultSet(); // get any ResultSet that came from our query
             if (rs.next() ) // if rs == null, then there is no ResultSet to view  
             {
-                score = rs.getInt("score");
+                score = rs.getInt("currentMatchScore");
                 
             }
             s.close(); // close the Statement to let the database know we're done with it
@@ -715,13 +746,13 @@ public class DBCommunicator {
         }
         catch(Exception e)
         {
-            System.out.println(e);
+            System.out.println("Error in getScoreForUser: \n"+e);
         }
         
         return score;
     }
     
-    public int getCurrentQuestionForUser(int matchID,String userName)
+    public int getCurrentQuestionForUser(int matchSessionID,String userName)
     {
         int currentQuestion = 0;
         
@@ -731,7 +762,7 @@ public class DBCommunicator {
             
             Statement s = conn.createStatement();
             
-            s.execute("Select currentQuestion from matchSession where userID = '"+userName+"' and matchID = '"+matchID+"';"); //check data inserted
+            s.execute("Select currentQuestion from matchSession where userID = '"+userName+"' and matchSessionID = '"+matchSessionID+"';"); //check data inserted
             
             ResultSet rs = s.getResultSet(); // get any ResultSet that came from our query
             if (rs.next() ) // if rs == null, then there is no ResultSet to view  
@@ -745,7 +776,7 @@ public class DBCommunicator {
         }
         catch(Exception e)
         {
-            System.out.println(e);
+            System.out.println("ERROR in getCurrentQuestionForUser: \n"+e);
         }
         
         return currentQuestion;
@@ -775,7 +806,7 @@ public class DBCommunicator {
         }
         catch(Exception e)
         {
-            System.out.println(e);
+            System.out.println("ERROR in checkIfUserInPool: \n"+e);
         }
         
         return inPool;
@@ -809,7 +840,7 @@ public class DBCommunicator {
         }
         catch(Exception e)
         {
-            System.out.println(e);
+            System.out.println("ERROR in removeUserFromPool: \n"+e);
         }
         
         return success;
@@ -839,7 +870,7 @@ public class DBCommunicator {
         }
         catch(Exception e)
         {
-            System.out.println(e);
+            System.out.println("ERROR in deleteMatch: \n"+e);
         }
         
         return success;
@@ -869,7 +900,7 @@ public class DBCommunicator {
         }
         catch(Exception e)
         {
-            System.out.println(e);
+            System.out.println("ERROR in deleteUser: \n"+e);
         }
         
         return success;

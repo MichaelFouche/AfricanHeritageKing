@@ -11,13 +11,6 @@ CREATE TABLE Users
 	score				FLOAT
 );
 
-CREATE TABLE GamePool
-(
-	userID				VARCHAR(10) PRIMARY KEY,	
-	opponentUserID                  VARCHAR(10),
-	CONSTRAINT fk_GamePool_userID FOREIGN KEY (userID) REFERENCES Users(userID)
-);
-
 CREATE TABLE MatchSession
 (
 	matchSessionID			INT PRIMARY KEY AUTO_INCREMENT,
@@ -28,6 +21,15 @@ CREATE TABLE MatchSession
 	currentMatchScore               FLOAT,        
 	CONSTRAINT fk_MatchSession_userID FOREIGN KEY (userID) REFERENCES Users(userID),
 	CONSTRAINT fk_MatchSession_opponentUserID FOREIGN KEY (opponentUserID) REFERENCES Users(userID)
+);
+
+CREATE TABLE GamePool
+(
+	userID				VARCHAR(10) PRIMARY KEY,	
+	opponentUserID                  VARCHAR(10),
+        matchID                         INT,
+
+	CONSTRAINT fk_GamePool_userID FOREIGN KEY (userID) REFERENCES Users(userID)
 );
 
 
