@@ -193,7 +193,7 @@ public class AHKJava implements ActionListener{
                         dbc.removeUserFromPool(loggedInUsername);
                         gameTimeEnable(true);
                         gamePoolEnable(false);
-                        progressSize = 60;
+                        progressSize = 30;
                         gameTimeLeft = true;
                         flagInGame = true;
                         waitingInPool = false;
@@ -425,10 +425,10 @@ public class AHKJava implements ActionListener{
          panelGameN = new JPanel(new BorderLayout(1,1));
          
          DefaultBoundedRangeModel model = new DefaultBoundedRangeModel(100, 50, 0, 250);
-         pbGame = new JProgressBar(0,60);
+         pbGame = new JProgressBar(0,30);
          pbGame.setStringPainted(true);
-         pbGame.setValue(60);
-         pbGame.setString("60 Seconds remaining");    
+         pbGame.setValue(30);
+         pbGame.setString("30 Seconds remaining");    
          panelGameN.add(pbGame);
          
          try
@@ -494,7 +494,7 @@ public class AHKJava implements ActionListener{
          jf.setLocationRelativeTo(null);
          jf.setDefaultCloseOperation(jf.EXIT_ON_CLOSE);
          
-         /*
+         
          jf.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE); //DISPOSE_ON_CLOSE,  DISPOSE_ON_CLOSE 
         jf.addWindowListener(new WindowAdapter() 
         {
@@ -508,9 +508,22 @@ public class AHKJava implements ActionListener{
                     jf.setDefaultCloseOperation(jf.EXIT_ON_CLOSE);
                     jf.setVisible(false);
                     jf.dispose();
+                    try
+                    {
+                        
+                    }
+                    catch(Exception ee)
+                    {
+                        System.out.println("ERROR in leaving pool when exiting program\n"+ee);
+                    }
+                    //check if in pool, if in pool, delete
+                    if(dbc.checkIfUserInPool(loggedInUsername))
+                    {
+                        dbc.removeUserFromPool(loggedInUsername);
+                    }
                 }
             }
-        });*/
+        });
          
          jf.setVisible(true);
      }
@@ -705,7 +718,7 @@ public class AHKJava implements ActionListener{
         jfR.add(panelRS, BorderLayout.SOUTH);
         jfR.pack();
         jfR.setVisible(true);
-        jfR.setLocationRelativeTo(null);
+        jfR.setLocationRelativeTo(jf);
         jfR.setDefaultCloseOperation(jfR.DISPOSE_ON_CLOSE);
         jfR.setResizable(false);
      }
@@ -776,6 +789,8 @@ public class AHKJava implements ActionListener{
              currentImageViewing=0;
          }
          
+         
+         
          //System.out.println("currentImageViewing: "+currentImageViewing);
          //need to update that entire center panel to allow the length of each place to not f**k everything up
          //set the question number
@@ -841,7 +856,7 @@ public class AHKJava implements ActionListener{
                 txtPW.setText(null);
                 btnSignIn.setText("Sign in");
                 gameTimeEnable(false);
-                gamePoolEnable(false);
+                gamePoolEnable(false);                
             }
             
             
@@ -853,25 +868,78 @@ public class AHKJava implements ActionListener{
         }
         if(e.getSource() == btnRRegister)
         {
-            String uname ="";
-            if(txtRUser.getText().equals(""))
+            String uname =txtRUser.getText();
+            String pass1 = txtRPass1.getText();
+            String pass2 = txtPass2.getText();
+            String email = txtEmail.getText();
+            if(uname.equals(""))
             {
                 JOptionPane.showMessageDialog(null, "Please enter a valid username","AHK - Register Request",JOptionPane.ERROR_MESSAGE);
             }
-            else if(txtRPass1.getText().equals(""))
+            else if(pass1.equals(""))
             {
                 JOptionPane.showMessageDialog(null, "Please enter a valid password","AHK - Register Request",JOptionPane.ERROR_MESSAGE);
             }
-            else if(txtPass2.getText().equals(""))
+            else if(pass2.equals(""))
             {
                 JOptionPane.showMessageDialog(null, "Please enter a valid confirmation password","AHK - Register Request",JOptionPane.ERROR_MESSAGE);
             }
-            else if(txtEmail.getText().equals(""))
+            else if(email.equals(""))
             {
                 JOptionPane.showMessageDialog(null, "Please enter a valid email","AHK - Register Request",JOptionPane.ERROR_MESSAGE);
             }
             else
             {
+                boolean errors = false;
+                ArrayList<String> listOfErrors;
+                listOfErrors = dbc.registerUser(uname, email, pass1, pass2);
+                for(int i=0;i<listOfErrors.size();i++)
+                {
+                    System.out.println(listOfErrors.get(i));
+                    switch(listOfErrors.get(i))
+                    {
+                        case "userNotAdded":
+                        {
+                            errors = true;
+                            JOptionPane.showMessageDialog(null, "The user was not added","AHK - Register",JOptionPane.ERROR_MESSAGE);
+                        }break;
+                        case "passwordMismatch":
+                        {
+                            errors = true;
+                            JOptionPane.showMessageDialog(null, "The passwords does not match","AHK - Register",JOptionPane.ERROR_MESSAGE);
+                        }break;
+                        case "passwordInvalid":
+                        {
+                            errors = true;
+                            JOptionPane.showMessageDialog(null, "Please enter a valid password\nA valid password is at least 6 characters long\nand should consist of at least a number, and a letter","AHK - Register",JOptionPane.ERROR_MESSAGE);
+                            //password moet 6 characters long wees en bestaan uit lowercase letters en numbers
+                        }break;
+                        case "emailInvalid":                            
+                        {
+                            errors = true;
+                            JOptionPane.showMessageDialog(null, "Please enter a valid email address","AHK - Register",JOptionPane.ERROR_MESSAGE);
+                           /* . die email moet begin met _, A-Z(upper of lower), 0-9, na dit optionally n "." en a-z, 0-9, moet @ he, 
+                            dan weer tussen a-z0-9, optional "." en a-z,0-9 en dan ".", a-z,0-9 met min length of 2 */
+                        }break;
+                        case "emailExists":
+                        {
+                            errors = true;
+                            JOptionPane.showMessageDialog(null, "The email is already registered to a user","AHK - Register",JOptionPane.ERROR_MESSAGE);
+                        }break;
+                        case "UserExists":
+                        {
+                            errors = true;
+                            JOptionPane.showMessageDialog(null, "This username is already in use","AHK - Register",JOptionPane.ERROR_MESSAGE);
+                        }break;
+                        default: ;
+                        break;
+                    }
+                }
+                if(!errors)
+                {
+                    jfR.dispose(); 
+                }
+               
                 /*RegisterUser();String errors[]      (this is also used in login)
                 -usernameExists(username);boolean
                 -emailExists(email);boolean
@@ -881,7 +949,7 @@ public class AHKJava implements ActionListener{
                 */
                 //dbc.usernameExists()
             }
-            jfR.dispose();
+            
         }
         /*btnJoin*/
         if(poolSize>0)
@@ -898,7 +966,7 @@ public class AHKJava implements ActionListener{
                         
                         gameTimeEnable(true);
                         gamePoolEnable(false);
-                        progressSize = 60;
+                        progressSize = 30;
                         gameTimeLeft = true;
                         flagInGame = true;
                         matchID = 0;
@@ -914,6 +982,8 @@ public class AHKJava implements ActionListener{
                             System.out.println("Could not create the game session: \n"+ee);
                         }
                         System.out.println("username:"+loggedInUsername+"opponent: "+userToJoin+ "session: "+sessionID+" match: "+matchID);
+                        lblQuest2.setText(dbc.getCurrentQuestionForUser(sessionID, loggedInUsername)+"");
+                        lblCorrect2.setText(dbc.getScoreForUser(sessionID, loggedInUsername)+"");
                     }
                     else
                     {
@@ -1012,6 +1082,9 @@ public class AHKJava implements ActionListener{
             jfW.dispose();
             scoreboardOpen = false;
             imTheJoiningUser = false;
+            
+            gamePoolEnable(true);
+            gameTimeEnable(false);
         }
     }
  
